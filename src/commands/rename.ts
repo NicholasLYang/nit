@@ -10,6 +10,10 @@ export default class Rename extends Command {
   ];
 
   static flags = {
+    repoPath: Flags.string({
+      description: "Repository",
+      required: false,
+    }),
     file: Flags.string({
       description: "File that contains symbol",
       required: true,
@@ -29,7 +33,7 @@ export default class Rename extends Command {
   public async run(): Promise<void> {
     const {
       args: { oldName, newName },
-      flags: { file, line },
+      flags: { file, line, repoPath },
     } = await this.parse(Rename);
     const lineNumber = Number.parseInt(line);
     if (Number.isNaN(lineNumber)) {
@@ -37,8 +41,15 @@ export default class Rename extends Command {
     }
 
     const filePath = path.join(process.cwd(), file);
-    console.log(filePath);
     // We decrement lineNumber because text editors tend to use 1-indexed line numbers
-    await renameSymbol(".", filePath, oldName, newName, lineNumber - 1);
+    await renameSymbol(
+      path.resolve(repoPath || "."),
+      filePath,
+      oldName,
+      newName,
+      lineNumber - 1
+    );
+
+    console.log(`Renamed '${oldName}' to '${newName}' in ${filePath}`);
   }
 }

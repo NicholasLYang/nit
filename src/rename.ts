@@ -102,7 +102,7 @@ async function initializeConnection(repoPath: string) {
   connection.onNotification(InitializedNotification.type, console.log);
   await connection.sendNotification(InitializedNotification.type, {});
 
-  return connection;
+  return { connection, lspProcess };
 }
 
 async function getValidPositions(
@@ -205,7 +205,7 @@ export async function renameSymbol(
 ) {
   const line = await getLine(filePath, lineNumber);
   const matches = getAllMatches(line, name);
-  const connection = await initializeConnection(repoPath);
+  const { connection, lspProcess } = await initializeConnection(repoPath);
   const validPositions = await getValidPositions(
     connection,
     filePath,
@@ -214,6 +214,7 @@ export async function renameSymbol(
   );
 
   if (validPositions.length === 0) {
+    lspProcess.kill();
     throw new Error(
       `There is no \`${name}\` on line ${lineNumber + 1}:\n ${
         lineNumber + 1
@@ -241,12 +242,14 @@ export async function renameSymbol(
       }
     }
   } else {
+    lspProcess.kill();
     throw new Error(
       `Ambiguous request, there are multiple valid \`${name}\` on line ${
         lineNumber + 1
       }`
     );
   }
+  lspProcess.kill();
 }
 
 function isTextDocumentEdit(
