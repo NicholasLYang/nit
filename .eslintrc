@@ -9,6 +9,7 @@
     "comma-dangle": "off",
     "quotes": "off",
     "radix": "off",
-    "semi": "off"
+    "semi": "off",
+    "max-params": "off",
   }
 }

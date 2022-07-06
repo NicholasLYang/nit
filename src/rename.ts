@@ -79,6 +79,7 @@ async function initializeConnection(repoPath: string) {
       console.error(`stderr: ${data}`);
     });
   }
+
   const logger = new MyLogger();
 
   const connection = createProtocolConnection(
@@ -116,6 +117,7 @@ async function getValidPositions(
   for (const charIndex of symbolPositions) {
     try {
       const position = { line: lineNumber, character: charIndex };
+
       await sendRequest(connection, PrepareRenameRequest.type, {
         textDocument: { uri: `file://${filePath}` },
         position,
@@ -202,10 +204,11 @@ export async function renameSymbol(
   name: string,
   newName: string,
   lineNumber: number
-) {
+): Promise<void> {
   const line = await getLine(filePath, lineNumber);
   const matches = getAllMatches(line, name);
   const { connection, lspProcess } = await initializeConnection(repoPath);
+
   const validPositions = await getValidPositions(
     connection,
     filePath,
@@ -249,6 +252,7 @@ export async function renameSymbol(
       }`
     );
   }
+
   lspProcess.kill();
 }
 

@@ -40,10 +40,13 @@ export default class Rename extends Command {
       throw new TypeError(`Invalid line: '${line}'`);
     }
 
-    const filePath = path.join(process.cwd(), file);
+    const filePath = path.resolve(file);
+    const resolvedRepoPath = path.resolve(repoPath || ".");
+    console.log(filePath);
+    console.log(resolvedRepoPath);
     // We decrement lineNumber because text editors tend to use 1-indexed line numbers
     await renameSymbol(
-      path.resolve(repoPath || "."),
+      resolvedRepoPath,
       filePath,
       oldName,
       newName,
