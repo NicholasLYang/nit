@@ -3,6 +3,7 @@ import {
   CreateFile,
   createProtocolConnection,
   DeleteFile,
+  DidOpenTextDocumentNotification,
   InitializedNotification,
   InitializeParams,
   InitializeRequest,
@@ -113,13 +114,24 @@ async function getValidPositions(
   symbolPositions: number[]
 ) {
   const validPositions = [];
+  const uri = `file://${filePath}`;
+  const text = await readFile(filePath, "utf-8");
+
+  await connection.sendNotification(DidOpenTextDocumentNotification.type, {
+    textDocument: {
+      uri,
+      languageId: "rust",
+      version: 1,
+      text,
+    },
+  });
 
   for (const charIndex of symbolPositions) {
     try {
       const position = { line: lineNumber, character: charIndex };
 
       await sendRequest(connection, PrepareRenameRequest.type, {
-        textDocument: { uri: `file://${filePath}` },
+        textDocument: { uri },
         position,
       });
 

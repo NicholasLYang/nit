@@ -42,8 +42,7 @@ export default class Rename extends Command {
 
     const filePath = path.resolve(file);
     const resolvedRepoPath = path.resolve(repoPath || ".");
-    console.log(filePath);
-    console.log(resolvedRepoPath);
+
     // We decrement lineNumber because text editors tend to use 1-indexed line numbers
     await renameSymbol(
       resolvedRepoPath,
