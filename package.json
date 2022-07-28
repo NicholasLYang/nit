@@ -1,6 +1,6 @@
 {
   "name": "refactor-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Refactors code using language servers",
   "author": "Nicholas Yang @NicholasLYang",
   "bin": {
@@ -19,7 +19,6 @@
   "dependencies": {
     "@oclif/core": "^1",
     "@oclif/plugin-help": "^5",
-    "@oclif/plugin-plugins": "^2.0.1",
     "@types/which": "^2.0.1",
     "prettier": "^2.7.1",
     "vscode-jsonrpc": "^8.0.1",
@@ -48,8 +47,7 @@
     "dirname": "refactor",
     "commands": "./dist/commands",
     "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-plugins"
+      "@oclif/plugin-help"
     ],
     "topicSeparator": " ",
     "topics": {
