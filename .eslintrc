@@ -11,5 +11,6 @@
     "radix": "off",
     "semi": "off",
     "max-params": "off",
+
   }
 }
