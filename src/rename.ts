@@ -16,9 +16,11 @@ import {
   TextDocument,
   TextDocumentEdit,
 } from "vscode-languageserver-protocol";
-import which from "which";
 import { StreamMessageReader, StreamMessageWriter } from "vscode-jsonrpc/node";
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, rm, writeFile } from "node:fs/promises";
+import { fileExists, getCLIDirectory } from "./utils";
+import path from "node:path";
+import { rename } from "fs/promises";
 
 class MyLogger implements Logger {
   error(message: string): void {
@@ -65,9 +67,22 @@ async function sendRequest<P, R, PR, E, RO>(
   }
 }
 
-async function initializeConnection(repoPath: string) {
-  const serverModule = await which("rust-analyzer");
-  const lspProcess = cp.spawn(serverModule);
+async function initializeConnection(repoPath: string, language: string) {
+  const serverPath = path.join(
+    await getCLIDirectory(),
+    "servers",
+    "rust-server"
+  );
+
+  try {
+    await access(serverPath);
+  } catch {
+    throw new Error(
+      `Could not find language server. Please install with \`nit langs install [LANGUAGE]\``
+    );
+  }
+
+  const lspProcess = cp.spawn(serverPath);
 
   if (process.env.LOG_LEVEL === "info") {
     lspProcess.stdout.on("data", (data) => {
@@ -138,7 +153,7 @@ async function getValidPositions(
       validPositions.push(position);
     } catch (e: any) {
       if (
-        e.code !== -32602 ||
+        e.code !== -32_602 ||
         e.message !== "No references found at position"
       ) {
         throw e;
@@ -204,6 +219,7 @@ async function createTextDocument(uri: string) {
   if (!uri.startsWith("file://")) {
     throw new Error("Invalid uri: " + uri);
   }
+
   const path = uri.slice(7);
   const fileContent = await readFile(path, "utf8");
   return TextDocument.create(uri, "rust", 0, fileContent);
@@ -215,11 +231,15 @@ export async function renameSymbol(
   filePath: string,
   name: string,
   newName: string,
-  lineNumber: number
+  lineNumber: number,
+  language: string
 ): Promise<void> {
   const line = await getLine(filePath, lineNumber);
   const matches = getAllMatches(line, name);
-  const { connection, lspProcess } = await initializeConnection(repoPath);
+  const { connection, lspProcess } = await initializeConnection(
+    repoPath,
+    language
+  );
 
   const validPositions = await getValidPositions(
     connection,
@@ -246,15 +266,29 @@ export async function renameSymbol(
     );
 
     if (result?.documentChanges) {
-      for (const change of result.documentChanges) {
-        if (isTextDocumentEdit(change)) {
-          const document = await createTextDocument(change.textDocument.uri);
-          await writeFile(
-            document.uri.slice(7),
-            TextDocument.applyEdits(document, change.edits)
-          );
-        }
-      }
+      await Promise.all(
+        result.documentChanges
+          .map(async (change) => {
+            if (isTextDocumentEdit(change)) {
+              const document = await createTextDocument(
+                change.textDocument.uri
+              );
+              return writeFile(
+                document.uri.slice(7),
+                TextDocument.applyEdits(document, change.edits)
+              );
+            } else if (change.kind === "rename") {
+              return renameFile(change);
+            } else if (change.kind === "create") {
+              return createFile(change);
+            } else if (change.kind === "delete") {
+              return deleteFile(change);
+            }
+
+            return undefined;
+          })
+          .filter((a) => a !== undefined)
+      );
     }
   } else {
     lspProcess.kill();
@@ -272,4 +306,35 @@ function isTextDocumentEdit(
   value: TextDocumentEdit | CreateFile | RenameFile | DeleteFile
 ): value is TextDocumentEdit {
   return "edits" in value;
+}
+
+async function renameFile(renameInfo: RenameFile) {
+  const oldFile = renameInfo.oldUri.slice(7);
+  const newFile = renameInfo.newUri.slice(7);
+
+  if (await fileExists(newFile)) {
+    if (renameInfo.options && renameInfo.options.overwrite) {
+      await rename(oldFile, newFile);
+    }
+  } else {
+    await rename(oldFile, newFile);
+  }
+}
+
+async function createFile(createInfo: CreateFile) {
+  const file = createInfo.uri.slice(7);
+
+  if (await fileExists(file)) {
+    if (createInfo.options && createInfo.options.overwrite) {
+      await writeFile(file, "");
+    }
+  } else {
+    await writeFile(file, "");
+  }
+}
+
+async function deleteFile(deleteInfo: DeleteFile) {
+  const file = deleteInfo.uri.slice(7);
+
+  await rm(file, { recursive: deleteInfo.options?.recursive });
 }
