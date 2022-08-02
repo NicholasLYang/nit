@@ -16,7 +16,6 @@ import {
   TextDocument,
   TextDocumentEdit,
 } from "vscode-languageserver-protocol";
-import which from "which";
 import { StreamMessageReader, StreamMessageWriter } from "vscode-jsonrpc/node";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { fileExists, getCLIDirectory } from "./utils";
