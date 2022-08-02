@@ -17,7 +17,7 @@ import {
   TextDocumentEdit,
 } from "vscode-languageserver-protocol";
 import { StreamMessageReader, StreamMessageWriter } from "vscode-jsonrpc/node";
-import { readFile, rm, writeFile } from "node:fs/promises";
+import { access, readFile, rm, writeFile } from "node:fs/promises";
 import { fileExists, getCLIDirectory } from "./utils";
 import path from "node:path";
 import { rename } from "fs/promises";
@@ -68,7 +68,20 @@ async function sendRequest<P, R, PR, E, RO>(
 }
 
 async function initializeConnection(repoPath: string, language: string) {
-  const serverPath = path.join(await getCLIDirectory(), "rust-server");
+  const serverPath = path.join(
+    await getCLIDirectory(),
+    "servers",
+    "rust-server"
+  );
+
+  try {
+    await access(serverPath);
+  } catch {
+    throw new Error(
+      `Could not find language server. Please install with \`nit langs install [LANGUAGE]\``
+    );
+  }
+
   const lspProcess = cp.spawn(serverPath);
 
   if (process.env.LOG_LEVEL === "info") {

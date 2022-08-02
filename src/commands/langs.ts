@@ -89,7 +89,7 @@ Installed languages
         );
       }
 
-      const languageDirectory = path.join(await getCLIDirectory(), "languages");
+      const languageDirectory = path.join(await getCLIDirectory(), "servers");
       const languageServerPath = path.join(
         languageDirectory,
         `${subCommandArg}-server`
