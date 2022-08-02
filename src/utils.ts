@@ -17,3 +17,12 @@ export async function getCLIDirectory(): Promise<string> {
 export enum Language {
   Rust = "rust",
 }
+
+export async function fileExists(path: string) {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}

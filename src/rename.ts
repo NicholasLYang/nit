@@ -18,9 +18,10 @@ import {
 } from "vscode-languageserver-protocol";
 import which from "which";
 import { StreamMessageReader, StreamMessageWriter } from "vscode-jsonrpc/node";
-import { readFile, writeFile } from "node:fs/promises";
-import { getCLIDirectory } from "./utils";
+import { readFile, rm, writeFile } from "node:fs/promises";
+import { fileExists, getCLIDirectory } from "./utils";
 import path from "node:path";
+import { rename } from "fs/promises";
 
 class MyLogger implements Logger {
   error(message: string): void {
@@ -140,7 +141,7 @@ async function getValidPositions(
       validPositions.push(position);
     } catch (e: any) {
       if (
-        e.code !== -32602 ||
+        e.code !== -32_602 ||
         e.message !== "No references found at position"
       ) {
         throw e;
@@ -206,6 +207,7 @@ async function createTextDocument(uri: string) {
   if (!uri.startsWith("file://")) {
     throw new Error("Invalid uri: " + uri);
   }
+
   const path = uri.slice(7);
   const fileContent = await readFile(path, "utf8");
   return TextDocument.create(uri, "rust", 0, fileContent);
@@ -252,15 +254,29 @@ export async function renameSymbol(
     );
 
     if (result?.documentChanges) {
-      for (const change of result.documentChanges) {
-        if (isTextDocumentEdit(change)) {
-          const document = await createTextDocument(change.textDocument.uri);
-          await writeFile(
-            document.uri.slice(7),
-            TextDocument.applyEdits(document, change.edits)
-          );
-        }
-      }
+      await Promise.all(
+        result.documentChanges
+          .map(async (change) => {
+            if (isTextDocumentEdit(change)) {
+              const document = await createTextDocument(
+                change.textDocument.uri
+              );
+              return writeFile(
+                document.uri.slice(7),
+                TextDocument.applyEdits(document, change.edits)
+              );
+            } else if (change.kind === "rename") {
+              return renameFile(change);
+            } else if (change.kind === "create") {
+              return createFile(change);
+            } else if (change.kind === "delete") {
+              return deleteFile(change);
+            }
+
+            return undefined;
+          })
+          .filter((a) => a !== undefined)
+      );
     }
   } else {
     lspProcess.kill();
@@ -278,4 +294,35 @@ function isTextDocumentEdit(
   value: TextDocumentEdit | CreateFile | RenameFile | DeleteFile
 ): value is TextDocumentEdit {
   return "edits" in value;
+}
+
+async function renameFile(renameInfo: RenameFile) {
+  const oldFile = renameInfo.oldUri.slice(7);
+  const newFile = renameInfo.newUri.slice(7);
+
+  if (await fileExists(newFile)) {
+    if (renameInfo.options && renameInfo.options.overwrite) {
+      await rename(oldFile, newFile);
+    }
+  } else {
+    await rename(oldFile, newFile);
+  }
+}
+
+async function createFile(createInfo: CreateFile) {
+  const file = createInfo.uri.slice(7);
+
+  if (await fileExists(file)) {
+    if (createInfo.options && createInfo.options.overwrite) {
+      await writeFile(file, "");
+    }
+  } else {
+    await writeFile(file, "");
+  }
+}
+
+async function deleteFile(deleteInfo: DeleteFile) {
+  const file = deleteInfo.uri.slice(7);
+
+  await rm(file, { recursive: deleteInfo.options?.recursive });
 }
