@@ -23,7 +23,7 @@
     "@types/which": "^2.0.1",
     "node-fetch": "^2.6.7",
     "prettier": "^2.7.1",
-    "vscode-jsonrpc": "^8.0.1",
+    "vscode-jsonrpc": "^8.0.2",
     "vscode-languageserver-protocol": "^3.17.1",
     "which": "^2.0.2"
   },
