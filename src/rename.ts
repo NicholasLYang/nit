@@ -19,6 +19,8 @@ import {
 import which from "which";
 import { StreamMessageReader, StreamMessageWriter } from "vscode-jsonrpc/node";
 import { readFile, writeFile } from "node:fs/promises";
+import { getCLIDirectory } from "./utils";
+import path from "node:path";
 
 class MyLogger implements Logger {
   error(message: string): void {
@@ -65,9 +67,9 @@ async function sendRequest<P, R, PR, E, RO>(
   }
 }
 
-async function initializeConnection(repoPath: string) {
-  const serverModule = await which("rust-analyzer");
-  const lspProcess = cp.spawn(serverModule);
+async function initializeConnection(repoPath: string, language: string) {
+  const serverPath = path.join(await getCLIDirectory(), "rust-server");
+  const lspProcess = cp.spawn(serverPath);
 
   if (process.env.LOG_LEVEL === "info") {
     lspProcess.stdout.on("data", (data) => {
@@ -215,11 +217,15 @@ export async function renameSymbol(
   filePath: string,
   name: string,
   newName: string,
-  lineNumber: number
+  lineNumber: number,
+  language: string
 ): Promise<void> {
   const line = await getLine(filePath, lineNumber);
   const matches = getAllMatches(line, name);
-  const { connection, lspProcess } = await initializeConnection(repoPath);
+  const { connection, lspProcess } = await initializeConnection(
+    repoPath,
+    language
+  );
 
   const validPositions = await getValidPositions(
     connection,

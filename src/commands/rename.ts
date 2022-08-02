@@ -1,6 +1,16 @@
 import { Command, Flags } from "@oclif/core";
 import { renameSymbol } from "../rename";
 import path from "node:path";
+import { Language } from "../utils";
+
+function getLanguageFromExtension(ext: string) {
+  switch (ext) {
+    case ".rs":
+      return Language.Rust;
+    default:
+      return undefined;
+  }
+}
 
 export default class Rename extends Command {
   static description = "Rename a symbol";
@@ -23,6 +33,9 @@ export default class Rename extends Command {
       description: "Line that contains symbol",
       required: true,
     }),
+    language: Flags.string({
+      description: "The programming language for the project",
+    }),
   };
 
   static args = [
@@ -33,15 +46,24 @@ export default class Rename extends Command {
   public async run(): Promise<void> {
     const {
       args: { oldName, newName },
-      flags: { file, line, repoPath },
+      flags: { file, line, repoPath, language },
     } = await this.parse(Rename);
     const lineNumber = Number.parseInt(line);
     if (Number.isNaN(lineNumber)) {
       throw new TypeError(`Invalid line: '${line}'`);
     }
 
+    const extension = path.extname(file);
     const filePath = path.resolve(file);
     const resolvedRepoPath = path.resolve(repoPath || ".");
+
+    const projectLanguage = language || getLanguageFromExtension(extension);
+
+    if (!projectLanguage) {
+      throw new Error(
+        `Unable to determine language for project. Please include --language flag`
+      );
+    }
 
     // We decrement lineNumber because text editors tend to use 1-indexed line numbers
     await renameSymbol(
@@ -49,7 +71,8 @@ export default class Rename extends Command {
       filePath,
       oldName,
       newName,
-      lineNumber - 1
+      lineNumber - 1,
+      projectLanguage
     );
 
     console.log(`Renamed '${oldName}' to '${newName}' in ${filePath}`);
