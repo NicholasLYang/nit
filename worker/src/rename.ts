@@ -17,10 +17,9 @@ import {
   TextDocumentEdit,
 } from "vscode-languageserver-protocol";
 import { StreamMessageReader, StreamMessageWriter } from "vscode-jsonrpc/node";
-import { access, readFile, rm, writeFile } from "node:fs/promises";
+import { access, readFile, rm, writeFile, rename } from "node:fs/promises";
 import { fileExists, getCLIDirectory } from "./utils";
 import path from "node:path";
-import { rename } from "fs/promises";
 
 class MyLogger implements Logger {
   error(message: string): void {
