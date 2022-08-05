@@ -1,11 +1,11 @@
 import { Command } from "@oclif/core";
-import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import fetch from "node-fetch";
 import { pipeline } from "node:stream/promises";
 import { createGunzip } from "node:zlib";
 import { createWriteStream } from "node:fs";
-import { chmod, rm } from "node:fs/promises";
+import { chmod } from "node:fs/promises";
 import { getCLIDirectory } from "../utils";
 
 const LANGUAGES = {

@@ -71,14 +71,14 @@ async function initializeConnection(repoPath: string, language: string) {
   const serverPath = path.join(
     await getCLIDirectory(),
     "servers",
-    "rust-server"
+    `${language}-server`
   );
 
   try {
     await access(serverPath);
   } catch {
     throw new Error(
-      `Could not find language server. Please install with \`nit langs install [LANGUAGE]\``
+      `Could not find language server for ${language}. Please install with \`nit langs install [LANGUAGE]\``
     );
   }
 

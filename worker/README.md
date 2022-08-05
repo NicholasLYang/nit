@@ -1,8 +1,7 @@
-Refactor CLI
+Nit Worker
 =================
 
-A CLI for refactoring code. Right now this is mostly used
-for its GitHub action, but in the future, it will be useful on its own.
+A worker for refactoring code. For ease of use we have it as a CLI
 
 ## Languages Supported
 
@@ -31,4 +30,3 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/rename.ts](https://github.com/NicholasLYang/refactor-cli/blob/v0.0.2/dist/commands/rename.ts)_
-
