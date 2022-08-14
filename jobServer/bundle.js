@@ -64638,7 +64638,8 @@ async function setupJob(url, commit) {
 async function wrapUpJob(oldName, newName, branchName) {
   await $`git add .`;
   await $`git commit -m 'nit: Renamed ${oldName} to ${newName}'`;
-  await $`git push -u origin ${branchName}`;
+  const result = await $`git push -u origin ${branchName}`;
+  console.log(result);
 }
 
 // ../worker/src/commands/rename.ts
