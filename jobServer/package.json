@@ -1,0 +1,21 @@
+{
+  "name": "jobserver",
+  "description": "The job server takes a command and processes it into a  job that a fly.io worker runs.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@octokit/app": "^13.0.5",
+    "@octokit/auth-app": "^4.0.4",
+    "dotenv": "^16.0.1",
+    "esbuild": "^0.15.2",
+    "fastify": "^4.4.0",
+    "zx": "^7.0.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild index.ts --bundle --platform=node --outfile=bundle.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

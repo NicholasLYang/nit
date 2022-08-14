@@ -13,13 +13,11 @@ enum CommandType {
  * Type for nit commands. What's always passed with a nit command
  * is the line and file info (even if it's not necessary).
  */
-type Command =
-  | {
-      type: CommandType.Rename;
-      oldName: string;
-      newName: string;
-    }
-  | { type: CommandType.Comment; comment: string };
+type Command = {
+  type: CommandType.Rename;
+  oldName: string;
+  newName: string;
+};
 
 const commandRegex =
   /\s*(?<commandType>rename|comment)\s*\((?<args>\s*(?:\w+\s*,\s*)*(?:\w+)?\s*)\)\s*/;
