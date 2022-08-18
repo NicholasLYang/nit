@@ -63224,7 +63224,7 @@ async function deleteFile(deleteInfo) {
 }
 
 // ../worker/src/commands/rename.ts
-var import_node_path5 = __toESM(require("node:path"));
+var import_node_path6 = __toESM(require("node:path"));
 
 // ../worker/node_modules/zx/build/core.js
 var import_node_assert = __toESM(require("node:assert"), 1);
@@ -64607,6 +64607,7 @@ var generateGlobTasksSync = normalizeArgumentsSync(generateTasksSync);
 var import_minimist = __toESM(require_minimist(), 1);
 var import_which2 = __toESM(require_which(), 1);
 var import_yaml = __toESM(require_dist2(), 1);
+var import_node_path5 = __toESM(require("node:path"), 1);
 var argv = (0, import_minimist.default)(process.argv.slice(2));
 var globby2 = Object.assign(function globby3(patterns, options) {
   return globby(patterns, options);
@@ -64626,14 +64627,16 @@ var parse = import_dist.default.parse;
 
 // ../worker/src/lifecycle.ts
 var import_promises3 = require("node:fs/promises");
+var import_node_os3 = require("node:os");
 async function setupJob(url, commit) {
-  if (await fileExists("./repo")) {
-    await (0, import_promises3.rm)("./repo", { recursive: true });
+  const repoPath = import_node_path5.default.join((0, import_node_os3.homedir)(), "nit-repo");
+  if (await fileExists(repoPath)) {
+    await (0, import_promises3.rm)(repoPath, { recursive: true });
   }
   const branchName = `nit-${v4()}`;
-  await $`git clone ${url} repo`;
+  await $`git clone ${url} ~/nit-repo`;
   await $`git checkout -b ${branchName}`;
-  return { branchName, repoPath: "./repo" };
+  return { branchName, repoPath };
 }
 async function wrapUpJob(oldName, newName, branchName) {
   await $`git add .`;
@@ -64665,10 +64668,12 @@ async function rename2({
   if (Number.isNaN(lineNumber)) {
     throw new TypeError(`Invalid line: '${line}'`);
   }
-  const repoFile = import_node_path5.default.join(repoPath, file);
-  const extension = import_node_path5.default.extname(repoFile);
-  const filePath = import_node_path5.default.resolve(repoFile);
-  const resolvedRepoPath = import_node_path5.default.resolve(repoPath);
+  console.log(repoPath);
+  const repoFile = import_node_path6.default.join(repoPath, file);
+  console.log(repoFile);
+  const extension = import_node_path6.default.extname(repoFile);
+  const filePath = import_node_path6.default.resolve(repoFile);
+  const resolvedRepoPath = import_node_path6.default.resolve(repoPath);
   const projectLanguage = language || getLanguageFromExtension(extension);
   if (!projectLanguage) {
     throw new Error(
