@@ -1,7 +1,7 @@
-import { Command, Flags } from "@oclif/core";
 import { renameSymbol } from "../rename";
 import path from "node:path";
-import { Language } from "../utils";
+import { expect, Language } from "../utils";
+import { setupJob, wrapUpJob } from "../lifecycle";
 
 function getLanguageFromExtension(ext: string) {
   switch (ext) {
@@ -12,69 +12,57 @@ function getLanguageFromExtension(ext: string) {
   }
 }
 
-export default class Rename extends Command {
-  static description = "Rename a symbol";
+interface RenameParameters {
+  repoUrl: string;
+  commitHash: string;
+  oldName: string;
+  newName: string;
+  lineNumber: string | number;
+  file: string;
+  language?: string;
+}
 
-  static examples = [
-    "<%= config.bin %> <%= command.id %> Input FileInput --file test.js --line 10",
-  ];
+export async function rename({
+  repoUrl,
+  commitHash,
+  oldName,
+  newName,
+  lineNumber: line,
+  file,
+  language,
+}: RenameParameters): Promise<void> {
+  const { repoPath, branchName } = await setupJob(repoUrl, commitHash);
 
-  static flags = {
-    repoPath: Flags.string({
-      description: "Repository",
-      required: false,
-    }),
-    file: Flags.string({
-      description: "File that contains symbol",
-      required: true,
-    }),
-    // TODO: Make optional and offer some way for users to disambiguate
-    line: Flags.string({
-      description: "Line that contains symbol",
-      required: true,
-    }),
-    language: Flags.string({
-      description: "The programming language for the project",
-    }),
-  };
-
-  static args = [
-    { name: "oldName", required: true },
-    { name: "newName", required: true },
-  ];
-
-  public async run(): Promise<void> {
-    const {
-      args: { oldName, newName },
-      flags: { file, line, repoPath, language },
-    } = await this.parse(Rename);
-    const lineNumber = Number.parseInt(line);
-    if (Number.isNaN(lineNumber)) {
-      throw new TypeError(`Invalid line: '${line}'`);
-    }
-
-    const extension = path.extname(file);
-    const filePath = path.resolve(file);
-    const resolvedRepoPath = path.resolve(repoPath || ".");
-
-    const projectLanguage = language || getLanguageFromExtension(extension);
-
-    if (!projectLanguage) {
-      throw new Error(
-        `Unable to determine language for project. Please include --language flag`
-      );
-    }
-
-    // We decrement lineNumber because text editors tend to use 1-indexed line numbers
-    await renameSymbol(
-      resolvedRepoPath,
-      filePath,
-      oldName,
-      newName,
-      lineNumber - 1,
-      projectLanguage
-    );
-
-    console.log(`Renamed '${oldName}' to '${newName}' in ${filePath}`);
+  const lineNumber = Number.parseInt(line);
+  if (Number.isNaN(lineNumber)) {
+    throw new TypeError(`Invalid line: '${line}'`);
   }
+
+  const repoFile = path.join(repoPath, file);
+  const extension = path.extname(repoFile);
+  const filePath = path.resolve(repoFile);
+  const resolvedRepoPath = path.resolve(repoPath);
+
+  const projectLanguage = language || getLanguageFromExtension(extension);
+
+  if (!projectLanguage) {
+    throw new Error(
+      `Unable to determine language for project. Please include --language flag`
+    );
+  }
+
+  console.log("Starting rename...");
+
+  // We decrement lineNumber because text editors tend to use 1-indexed line numbers
+  await renameSymbol(
+    resolvedRepoPath,
+    filePath,
+    oldName,
+    newName,
+    lineNumber - 1,
+    projectLanguage
+  );
+
+  console.log(`Renamed '${oldName}' to '${newName}' in ${filePath}`);
+  await wrapUpJob(oldName, newName, branchName, repoPath);
 }

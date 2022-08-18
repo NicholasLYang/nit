@@ -27,20 +27,17 @@ export async function fileExists(path: string): Promise<boolean> {
   }
 }
 
-export function getLineOffset(text: string, lineNumber: number) {
-  for (let i = 0; i < text.length; i++) {
-    if (lineNumber === 0) {
-      return i;
-    }
+export function uriToFile(uri: string): string {
+  return uri.slice(7);
+}
 
-    if (text[i] === "\n") {
-      lineNumber -= 1;
-    }
-  }
+export function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-  if (lineNumber === 0) {
-    return text.length - 1;
-  } else {
-    throw new Error("Invalid line number: " + lineNumber);
+export function expect<T>(value: T | undefined | null, message: string): T {
+  if (!value) {
+    throw new TypeError(message);
   }
+  return value;
 }

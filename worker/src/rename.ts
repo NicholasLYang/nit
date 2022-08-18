@@ -18,7 +18,7 @@ import {
 } from "vscode-languageserver-protocol";
 import { StreamMessageReader, StreamMessageWriter } from "vscode-jsonrpc/node";
 import { access, readFile, rm, writeFile, rename } from "node:fs/promises";
-import { fileExists, getCLIDirectory } from "./utils";
+import { delay, fileExists, getCLIDirectory } from "./utils";
 import path from "node:path";
 
 class MyLogger implements Logger {
@@ -50,6 +50,7 @@ async function sendRequest<P, R, PR, E, RO>(
   type: ProtocolRequestType<P, R, PR, E, RO>,
   params: P
 ) {
+  let waitTime = 50;
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
@@ -63,6 +64,9 @@ async function sendRequest<P, R, PR, E, RO>(
         throw e;
       }
     }
+
+    await delay(waitTime);
+    waitTime *= 2;
   }
 }
 
@@ -224,7 +228,15 @@ async function createTextDocument(uri: string) {
   return TextDocument.create(uri, "rust", 0, fileContent);
 }
 
-// NOTE: lineNumber is 0-indexed unlike most text editors
+/**
+ * @param repoPath
+ * @param filePath
+ * @param name - Old name for the symbol
+ * @param newName
+ * @param lineNumber - Line number for the symbol. 0-indexed
+ * unlike most text editors' line numbers
+ * @param language
+ */
 export async function renameSymbol(
   repoPath: string,
   filePath: string,
@@ -232,14 +244,17 @@ export async function renameSymbol(
   newName: string,
   lineNumber: number,
   language: string
-): Promise<void> {
+): Promise<Set<string>> {
   const line = await getLine(filePath, lineNumber);
   const matches = getAllMatches(line, name);
+  const editedFiles = new Set<string>();
+
+  console.log("Initializing connection");
   const { connection, lspProcess } = await initializeConnection(
     repoPath,
     language
   );
-
+  console.log("Getting positions");
   const validPositions = await getValidPositions(
     connection,
     filePath,
@@ -257,6 +272,7 @@ export async function renameSymbol(
   }
 
   if (validPositions.length === 1) {
+    console.log("Getting rename changes...");
     const result = await getRenameChanges(
       connection,
       `file://${filePath}`,
@@ -265,10 +281,12 @@ export async function renameSymbol(
     );
 
     if (result?.documentChanges) {
+      console.log("Applying changes");
       await Promise.all(
         result.documentChanges
           .map(async (change) => {
             if (isTextDocumentEdit(change)) {
+              editedFiles.add(change.textDocument.uri);
               const document = await createTextDocument(
                 change.textDocument.uri
               );
@@ -276,15 +294,21 @@ export async function renameSymbol(
                 document.uri.slice(7),
                 TextDocument.applyEdits(document, change.edits)
               );
-            } else if (change.kind === "rename") {
-              return renameFile(change);
-            } else if (change.kind === "create") {
-              return createFile(change);
-            } else if (change.kind === "delete") {
-              return deleteFile(change);
             }
 
-            return undefined;
+            if (change.kind === "rename") {
+              editedFiles.add(change.newUri);
+              return renameFile(change);
+            }
+
+            if (change.kind === "create") {
+              editedFiles.add(change.uri);
+              return createFile(change);
+            }
+
+            if (change.kind === "delete") {
+              return deleteFile(change);
+            }
           })
           .filter((a) => a !== undefined)
       );
@@ -299,6 +323,8 @@ export async function renameSymbol(
   }
 
   lspProcess.kill();
+
+  return editedFiles;
 }
 
 function isTextDocumentEdit(
