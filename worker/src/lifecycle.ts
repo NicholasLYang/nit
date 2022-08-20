@@ -38,7 +38,5 @@ export async function wrapUpJob(
   cd(repoPath);
   await $`git add .`;
   await $`git commit -m 'nit: Renamed ${oldName} to ${newName}'`;
-  console.log(await $`git status`);
-  const result = await $`git push -u origin ${branchName}`;
-  console.log(result);
+  await $`git push -u origin ${branchName}`;
 }

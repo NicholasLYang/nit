@@ -1,6 +1,6 @@
 import { renameSymbol } from "../rename";
 import path from "node:path";
-import { expect, Language } from "../utils";
+import { Language } from "../utils";
 import { setupJob, wrapUpJob } from "../lifecycle";
 
 function getLanguageFromExtension(ext: string) {

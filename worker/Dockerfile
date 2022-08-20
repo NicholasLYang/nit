@@ -3,6 +3,6 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 RUN npm install
-COPY . .
+COPY src/ src/
 RUN npm run build
-CMD ["./bin/run"]
+CMD ["node", "bundle.js"]
