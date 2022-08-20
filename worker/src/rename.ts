@@ -71,21 +71,7 @@ async function sendRequest<P, R, PR, E, RO>(
 }
 
 async function initializeConnection(repoPath: string, language: string) {
-  const serverPath = path.join(
-    await getCLIDirectory(),
-    "servers",
-    `${language}-server`
-  );
-
-  try {
-    await access(serverPath);
-  } catch {
-    throw new Error(
-      `Could not find language server for ${language}. Please install with \`nit langs install [LANGUAGE]\``
-    );
-  }
-
-  const lspProcess = cp.spawn(serverPath);
+  const lspProcess = cp.spawn(path.join(__dirname, "rust-analyzer"));
 
   if (process.env.LOG_LEVEL === "info") {
     lspProcess.stdout.on("data", (data) => {

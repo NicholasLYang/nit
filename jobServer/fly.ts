@@ -7,7 +7,7 @@ export async function startRenameJob(
   filePath: string
 ) {
   const result = await fetch(
-    `http://${process.env.FLY_API_HOSTNAME}/v1/apps/nit/machines`,
+    `http://${process.env.FLY_API_HOSTNAME}/v1/apps/aecia/machines`,
     {
       method: "POST",
       headers: {
@@ -15,7 +15,7 @@ export async function startRenameJob(
       },
       body: JSON.stringify({
         config: {
-          image: "nicholaslyang/nit-worker",
+          image: "registry.fly.io/nit",
           env: {
             COMMAND: "rename",
             REPO_URL: repoUrl,
@@ -29,7 +29,6 @@ export async function startRenameJob(
       }),
     }
   );
-  console.log(result);
 
   return result.json();
 }
