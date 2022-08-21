@@ -31,7 +31,10 @@ export async function rename({
   file,
   language,
 }: RenameParameters): Promise<void> {
-  const { repoPath, branchName } = await setupJob(repoUrl, commitHash);
+  const { repoPath, branchName, rustAnalyzerPath } = await setupJob(
+    repoUrl,
+    commitHash
+  );
 
   const lineNumber = Number.parseInt(line);
   if (Number.isNaN(lineNumber)) {
@@ -60,7 +63,8 @@ export async function rename({
     oldName,
     newName,
     lineNumber - 1,
-    projectLanguage
+    projectLanguage,
+    rustAnalyzerPath
   );
 
   console.log(`Renamed '${oldName}' to '${newName}' in ${filePath}`);

@@ -17,8 +17,8 @@ import {
   TextDocumentEdit,
 } from "vscode-languageserver-protocol";
 import { StreamMessageReader, StreamMessageWriter } from "vscode-jsonrpc/node";
-import { access, readFile, rm, writeFile, rename } from "node:fs/promises";
-import { delay, fileExists, getCLIDirectory } from "./utils";
+import { readFile, rm, writeFile, rename } from "node:fs/promises";
+import { delay, fileExists } from "./utils";
 import path from "node:path";
 
 class MyLogger implements Logger {
@@ -70,8 +70,11 @@ async function sendRequest<P, R, PR, E, RO>(
   }
 }
 
-async function initializeConnection(repoPath: string, language: string) {
-  const lspProcess = cp.spawn(path.join(__dirname, "rust-analyzer"));
+async function initializeConnection(
+  repoPath: string,
+  rustAnalyzerPath: string
+) {
+  const lspProcess = cp.spawn(rustAnalyzerPath);
 
   if (process.env.LOG_LEVEL === "info") {
     lspProcess.stdout.on("data", (data) => {
@@ -222,6 +225,7 @@ async function createTextDocument(uri: string) {
  * @param lineNumber - Line number for the symbol. 0-indexed
  * unlike most text editors' line numbers
  * @param language
+ * @param rustAnalyzerPath
  */
 export async function renameSymbol(
   repoPath: string,
@@ -229,7 +233,8 @@ export async function renameSymbol(
   name: string,
   newName: string,
   lineNumber: number,
-  language: string
+  language: string,
+  rustAnalyzerPath: string
 ): Promise<Set<string>> {
   const line = await getLine(filePath, lineNumber);
   const matches = getAllMatches(line, name);
@@ -238,8 +243,9 @@ export async function renameSymbol(
   console.log("Initializing connection");
   const { connection, lspProcess } = await initializeConnection(
     repoPath,
-    language
+    rustAnalyzerPath
   );
+
   console.log("Getting positions");
   const validPositions = await getValidPositions(
     connection,
