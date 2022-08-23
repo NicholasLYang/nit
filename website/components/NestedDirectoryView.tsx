@@ -3,6 +3,7 @@
  */
 import { gql, useQuery } from "@apollo/client";
 import DirectoryView from "./DirectoryView";
+import { useEffect } from "react";
 
 interface Props {
   oid: string;

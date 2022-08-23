@@ -26,14 +26,24 @@ export default function DirectoryView({
   repoOwner,
   repoName,
 }: Props) {
-  const openFileIndex = useSelector(
-    (state: RootState) => state.repo.selectedEntries[nestingLevel]
+  const openFileIndex = useSelector((state: RootState) =>
+    nestingLevel < state.repo.selectedEntries.length
+      ? state.repo.selectedEntries[nestingLevel].index
+      : 0
+  );
+  const selectedDirectory = useSelector(
+    (state: RootState) => state.repo.selectedDirectory
   );
   const dispatch = useDispatch();
 
   return (
     <div className="flex">
-      <ul className="space-y-2 p-10">
+      <ul
+        className={classNames(
+          "space-y-2 p-10",
+          selectedDirectory === nestingLevel && "bg-slate-200"
+        )}
+      >
         {directory.object.entries.map((file, index) => (
           <li
             onClick={() => {
@@ -41,6 +51,8 @@ export default function DirectoryView({
                 selectNewEntry({
                   directoryIndex: nestingLevel,
                   newEntryIndex: index,
+                  length: directory.object.entries.length,
+                  isDirectory: directory.object.entries[index].type === "tree",
                 })
               );
             }}

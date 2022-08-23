@@ -11,6 +11,13 @@ interface InitializeAction {
 interface SelectNewEntryAction {
   directoryIndex: number;
   newEntryIndex: number;
+  length: number;
+  isDirectory: boolean;
+}
+
+interface Entry {
+  index: number;
+  length: number;
 }
 
 const repoSlice = createSlice({
@@ -21,30 +28,68 @@ const repoSlice = createSlice({
     // foo > bar > baz where bar is the 4th entry in foo
     // and baz is the 2nd entry in bar, we'd have
     // selectedEntries: [4, 2]
-    selectedEntries: [] as number[],
+    selectedEntries: [] as Entry[],
     // The directory that is currently selected for keyboard
     // purposes
-    currentSelectedDirectory: 0,
+    selectedDirectory: 0,
+    directoryCount: 0,
+    isInitialized: false,
   },
   reducers: {
     initialize: (state, action: PayloadAction<InitializeAction>) => {
       const index = action.payload.repository.object.entries.findIndex(
         (e) => e.name === "README.md"
       );
+      const length = action.payload.repository.object.entries.length;
 
-      state.selectedEntries = [index || 0];
+      state.selectedEntries = [{ index: index || 0, length }];
+      state.isInitialized = true;
     },
     selectNewEntry: (state, action: PayloadAction<SelectNewEntryAction>) => {
       state.selectedEntries = state.selectedEntries.slice(
         0,
         action.payload.directoryIndex
       );
-      state.selectedEntries.push(action.payload.newEntryIndex);
+      state.selectedEntries.push({
+        index: action.payload.newEntryIndex,
+        length: action.payload.length,
+      });
+
+      state.selectedDirectory = action.payload.directoryIndex;
+    },
+    incrementDirectory: (state) => {
+      state.selectedDirectory = state.selectedDirectory + 1;
+    },
+    decrementDirectory: (state) => {
+      state.selectedDirectory = Math.max(state.selectedDirectory - 1, 0);
+    },
+    incrementEntry: (state) => {
+      const index = state.selectedDirectory;
+
+      state.selectedEntries[index].index =
+        (state.selectedEntries[index].index + 1) %
+        state.selectedEntries[index].length;
+    },
+    decrementEntry: (state) => {
+      const index = state.selectedDirectory;
+
+      state.selectedEntries[index].index =
+        (state.selectedEntries[index].index +
+          state.selectedEntries[index].length -
+          1) %
+        state.selectedEntries[index].length;
     },
   },
 });
 
-export const { initialize, selectNewEntry } = repoSlice.actions;
+export const {
+  initialize,
+  selectNewEntry,
+  incrementDirectory,
+  decrementDirectory,
+  incrementEntry,
+  decrementEntry,
+} = repoSlice.actions;
 
 export const store = configureStore({ reducer: { repo: repoSlice.reducer } });
 

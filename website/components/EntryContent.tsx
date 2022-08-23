@@ -19,7 +19,7 @@ export default function EntryContent({
   if (file.type === "blob") {
     if (file.name.endsWith(".md")) {
       return (
-        <div className="prose lg:prose-xl">
+        <div className="prose lg:prose-xl p-7">
           <ReactMarkdown>{file.object.text}</ReactMarkdown>
         </div>
       );

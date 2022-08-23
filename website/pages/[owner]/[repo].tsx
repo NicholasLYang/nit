@@ -2,10 +2,18 @@ import { useRouter } from "next/router";
 import client from "../../apollo-client";
 import { gql } from "@apollo/client";
 import { GetServerSidePropsContext } from "next";
-import { useCallback, useEffect, useState } from "react";
-import EntryContent from "../../components/EntryContent";
+import { useCallback, useEffect } from "react";
 import { Directory } from "../../components/types";
 import DirectoryView from "../../components/DirectoryView";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  decrementDirectory,
+  incrementDirectory,
+  decrementEntry,
+  incrementEntry,
+  initialize,
+  RootState,
+} from "../../store";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   if (context.params) {
@@ -13,6 +21,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       query: gql`
         query RepositoryContents($owner: String!, $name: String!) {
           repository(owner: $owner, name: $name) {
+            id
             object(expression: "HEAD:") {
               ... on Tree {
                 entries {
@@ -49,51 +58,69 @@ interface Props {
 
 export default function RepositoryPage({ repository }: Props) {
   const router = useRouter();
-
+  const dispatch = useDispatch();
   const { owner, repo } = router.query;
-  // const handleKeyPress = useCallback(
-  //   (event: KeyboardEvent) => {
-  //     if (event.key === "ArrowDown") {
-  //       event.preventDefault();
-  //       setOpenFile((openFile) => {
-  //         if (openFile) {
-  //           return (openFile + 1) % repository.object.entries.length;
-  //         }
-  //       });
-  //     } else if (event.key === "ArrowUp") {
-  //       event.preventDefault();
-  //       setOpenFile((openFile) => {
-  //         if (openFile) {
-  //           return (
-  //             (openFile + repository.object.entries.length - 1) %
-  //             repository.object.entries.length
-  //           );
-  //         }
-  //       });
-  //     }
-  //   },
-  //   [repository.object.entries.length]
-  // );
-  //
-  // useEffect(() => {
-  //   document.addEventListener("keydown", handleKeyPress);
-  //
-  //   return () => {
-  //     document.removeEventListener("keydown", handleKeyPress);
-  //   };
-  // }, [handleKeyPress]);
+  const isInitialized = useSelector(
+    (state: RootState) => state.repo.isInitialized
+  );
+  useEffect(() => {
+    if (repository) {
+      dispatch(initialize({ repository }));
+    }
+  }, [dispatch]);
+
+  const handleKeyPress = useCallback(
+    (event: KeyboardEvent) => {
+      console.log(event.key);
+      switch (event.key) {
+        case "ArrowDown": {
+          event.preventDefault();
+          dispatch(incrementEntry());
+          break;
+        }
+        case "ArrowUp": {
+          event.preventDefault();
+          dispatch(decrementEntry());
+
+          break;
+        }
+        case "ArrowRight": {
+          event.preventDefault();
+          dispatch(incrementDirectory());
+          break;
+        }
+        case "ArrowLeft": {
+          event.preventDefault();
+          dispatch(decrementDirectory());
+          break;
+        }
+        // No default
+      }
+    },
+    [repository.object.entries.length]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [handleKeyPress]);
 
   return (
     <div className="p-1">
       <h1 className="text-3xl p-2">
         {owner}/{repo}
       </h1>
-      <DirectoryView
-        repoName={repo}
-        repoOwner={owner}
-        nestingLevel={0}
-        directory={repository}
-      />
+      {isInitialized && (
+        <DirectoryView
+          repoName={repo}
+          repoOwner={owner}
+          nestingLevel={0}
+          directory={repository}
+        />
+      )}
     </div>
   );
 }
