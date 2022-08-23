@@ -66,6 +66,7 @@ async function sendRequest<P, R, PR, E, RO>(
     }
 
     await delay(waitTime);
+    console.log(`wait time is now ${waitTime}`);
     waitTime *= 2;
   }
 }

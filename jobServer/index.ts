@@ -7,7 +7,6 @@ import Fastify from "fastify";
 import { parseCommand } from "./parser";
 import { expect } from "./utils";
 import { createAppAuth } from "@octokit/auth-app";
-//import { rename } from "../worker/src";
 import { startRenameJob } from "./fly";
 
 const jobServer = Fastify({ logger: true });
@@ -69,15 +68,14 @@ jobServer.post("/events/pull-request-comment", async (request, response) => {
     installationId: installation.id,
   });
 
-  return `https://x-access-token:${installationAuth.token}@github.com/${repository.full_name}.git`;
-  // return startRenameJob(
-  //   `https://x-access-token:${installationAuth.token}@github.com/${repository.full_name}.git`,
-  //   comment.commit_id,
-  //   command.oldName,
-  //   command.newName,
-  //   comment.position,
-  //   comment.path
-  // );
+  return startRenameJob(
+    `https://x-access-token:${installationAuth.token}@github.com/${repository.full_name}.git`,
+    comment.commit_id,
+    command.oldName,
+    command.newName,
+    comment.position,
+    comment.path
+  );
 });
 
 async function startServer() {
