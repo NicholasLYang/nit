@@ -6,27 +6,30 @@ import {
   useSubmit,
 } from "@remix-run/react";
 import client from "~/apollo-client";
-import { useCallback, useEffect, useState } from "react";
-import Index from "~/routes/$owner/$name";
-import Issues from "~/routes/$owner/$name/issues";
+import { useCallback, useEffect } from "react";
 
 export async function loader({ params }) {
   const { data } = await client.query({
     query: gql`
-      query Repository {
-        repository(owner: "facebook", name: "react") {
-          issues(first: 20) {
+      query Repository($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name) {
+          issues(
+            first: 20
+            filterBy: { states: [OPEN] }
+            orderBy: { field: CREATED_AT, direction: DESC }
+          ) {
             nodes {
               id
-              databaseId
+              bodyHTML
+              number
               title
             }
           }
         }
       }
     `,
+    variables: { owner: params.owner, name: params.name },
   });
-
   return {
     owner: params.owner,
     name: params.name,
@@ -40,7 +43,6 @@ enum PageState {
 }
 
 export default function Repository() {
-  const [searchParams, setSearchParams] = useSearchParams();
   const submit = useSubmit();
   const { owner, name, issues } = useLoaderData();
 
@@ -67,7 +69,7 @@ export default function Repository() {
   return (
     <main className="flex h-screen flex-col items-center justify-between">
       <div className="flex grow items-center">
-        <h1>
+        <h1 className="pt-5">
           <span className="font-bold">{owner}</span> / {name}
         </h1>
       </div>

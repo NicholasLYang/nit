@@ -3,5 +3,6 @@
  */
 module.exports = {
   cacheDirectory: "./node_modules/.cache/remix",
+  serverDependenciesToBundle: [],
   ignoredRouteFiles: ["**/.*", "**/*.css", "**/*.test.{js,jsx,ts,tsx}"],
 };
