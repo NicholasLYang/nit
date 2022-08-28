@@ -1,8 +1,14 @@
 import { gql } from "@apollo/client";
-import { useLoaderData } from "@remix-run/react";
+import {
+  Outlet,
+  useLoaderData,
+  useSearchParams,
+  useSubmit,
+} from "@remix-run/react";
 import client from "~/apollo-client";
 import { useCallback, useEffect, useState } from "react";
-import RepositoryActionGrid from "~/components/RepositoryActionGrid";
+import Index from "~/routes/$owner/$name";
+import Issues from "~/routes/$owner/$name/issues";
 
 export async function loader({ params }) {
   const { data } = await client.query({
@@ -12,6 +18,7 @@ export async function loader({ params }) {
           issues(first: 20) {
             nodes {
               id
+              databaseId
               title
             }
           }
@@ -20,26 +27,28 @@ export async function loader({ params }) {
     `,
   });
 
-  return { owner: params.owner, name: params.name, issues: data.repository.issues.nodes }
+  return {
+    owner: params.owner,
+    name: params.name,
+    issues: data.repository.issues.nodes,
+  };
 }
 
 enum PageState {
-  Home,
-  Issues
+  Home = "home",
+  Issues = "issues",
 }
 
 export default function Repository() {
-  const [pageState, setPageState] = useState(PageState.Home);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const submit = useSubmit();
   const { owner, name, issues } = useLoaderData();
 
   const handleKeyPress = useCallback((event) => {
     switch (event.keyCode) {
-      case 73: { // i
-        setPageState(PageState.Issues);
-        break;
-      }
-      case 72: { // h
-        setPageState(PageState.Home);
+      case 73: {
+        // i
+        submit(null, { method: "get", action: `/${owner}/${name}/issues` });
         break;
       }
     }
@@ -47,27 +56,22 @@ export default function Repository() {
 
   useEffect(() => {
     // attach the event listener
-    document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener("keydown", handleKeyPress);
 
     // remove the event listener
     return () => {
-      document.removeEventListener('keydown', handleKeyPress);
+      document.removeEventListener("keydown", handleKeyPress);
     };
-  }, [])
+  }, []);
 
-  let child;
-  switch (pageState) {
-    case PageState.Home: {
-      child = <RepositoryActionGrid />
-      break;
-    }
-    case PageState.Issues: {
-      child = issues.map(issue => <ul><li>{issue.title}</li></ul>)
-    }
-  }
-
-  return <main className="flex flex-col items-center justify-between h-screen">
-    <div className="grow flex items-center"><h1><span className="font-bold">{owner}</span> / {name}</h1></div>
-    {child}
-  </main>
+  return (
+    <main className="flex h-screen flex-col items-center justify-between">
+      <div className="flex grow items-center">
+        <h1>
+          <span className="font-bold">{owner}</span> / {name}
+        </h1>
+      </div>
+      <Outlet context={issues} />
+    </main>
+  );
 }
