@@ -84,3 +84,11 @@ export function isInViewport(element) {
     rect.right <= (window.innerWidth || document.documentElement.clientWidth)
   );
 }
+
+export function expect<T>(value: T | undefined, error: string): T {
+  if (!value) {
+    throw new Error(error);
+  }
+
+  return value;
+}
