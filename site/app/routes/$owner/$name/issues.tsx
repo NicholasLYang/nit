@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useOutletContext, useParams, useSubmit } from "@remix-run/react";
+import { Link, useOutletContext, useParams, useSubmit } from "@remix-run/react";
 import { classNames, isInViewport } from "~/utils";
 
 export default function Issues() {
@@ -105,15 +105,24 @@ export default function Issues() {
   return (
     <div className="flex flex-col items-center pb-10">
       <div className="flex p-10">
-        <div className="flex h-24 w-60 items-center justify-center rounded shadow">
+        <Link
+          to={`/${params.owner}/${params.name}`}
+          className="flex h-24 w-60 items-center justify-center rounded shadow"
+        >
           <span className="font-bold">B</span>ack
-        </div>
-        <div className="flex h-24 w-60 items-center justify-center rounded shadow">
+        </Link>
+        <Link
+          to={`/${params.owner}/${params.name}/issues/search`}
+          className="flex h-24 w-60 items-center justify-center rounded shadow"
+        >
           <span className="font-bold">S</span>earch
-        </div>
-        <div className="flex h-24 w-60 items-center justify-center rounded shadow">
+        </Link>
+        <Link
+          to={`/${params.owner}/${params.name}/issues/new`}
+          className="flex h-24 w-60 items-center justify-center rounded shadow"
+        >
           <span className="font-bold">N</span>ew
-        </div>
+        </Link>
       </div>
       <ul className="space-y-2">
         {issues.map((issue, i) => (

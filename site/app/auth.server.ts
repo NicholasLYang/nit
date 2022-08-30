@@ -2,11 +2,12 @@ import { Authenticator } from "remix-auth";
 import { sessionStorage } from "~/session.server";
 import { expect } from "~/utils";
 import { GitHubStrategy } from "remix-auth-github";
-import { createUser, User } from "./models/user.server";
 
 interface User {}
 
-export let authenticator = new Authenticator<User>(sessionStorage);
+export let authenticator = new Authenticator<User>(sessionStorage, {
+  sessionKey: "accessToken",
+});
 
 authenticator.use(
   new GitHubStrategy(
@@ -22,7 +23,7 @@ authenticator.use(
       callbackURL: "http://localhost:3000/auth/github/callback",
     },
     async ({ accessToken, extraParams, profile }) => {
-      return createUser(profile.emails[0].value);
+      return accessToken;
     }
   ),
   "github"

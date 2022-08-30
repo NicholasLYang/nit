@@ -1,14 +1,12 @@
 import { gql } from "@apollo/client";
-import {
-  Outlet,
-  useLoaderData,
-  useSearchParams,
-  useSubmit,
-} from "@remix-run/react";
+import { Outlet, useLoaderData, useSubmit } from "@remix-run/react";
 import client from "~/apollo-client";
 import { useCallback, useEffect } from "react";
+import { getSession } from "~/session.server";
+import { LoaderArgs } from "@remix-run/node";
 
-export async function loader({ params }) {
+export async function loader({ params, request }: LoaderArgs) {
+  const session = await getSession(request);
   const { data } = await client.query({
     query: gql`
       query Repository($owner: String!, $name: String!) {
@@ -29,17 +27,17 @@ export async function loader({ params }) {
       }
     `,
     variables: { owner: params.owner, name: params.name },
+    context: {
+      headers: {
+        Authorization: `bearer ${session.data.accessToken}`,
+      },
+    },
   });
   return {
     owner: params.owner,
     name: params.name,
     issues: data.repository.issues.nodes,
   };
-}
-
-enum PageState {
-  Home = "home",
-  Issues = "issues",
 }
 
 export default function Repository() {
@@ -51,6 +49,11 @@ export default function Repository() {
       case 73: {
         // i
         submit(null, { method: "get", action: `/${owner}/${name}/issues` });
+        break;
+      }
+      case 72: {
+        // h
+        submit(null, { method: "get", action: `/` });
         break;
       }
     }
