@@ -1,38 +1,52 @@
-import { gql } from "@apollo/client";
 import { Outlet, useLoaderData, useSubmit } from "@remix-run/react";
-import client from "~/apollo-client";
 import { useCallback, useEffect } from "react";
-import { getSession } from "~/session.server";
 import { LoaderArgs } from "@remix-run/node";
+import { gql } from "@apollo/client";
+import client from "~/apollo-client";
+import { authenticator } from "~/auth.server";
+import { createAppAuth } from "@octokit/auth-app";
+import { expect } from "~/utils";
 
 export async function loader({ params, request }: LoaderArgs) {
-  const session = await getSession(request);
+  const { installations } = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
+
+  const auth = createAppAuth({
+    appId: expect(process.env.APP_ID, "Expected APP_ID environment variable"),
+    privateKey: expect(
+      process.env.PRIVATE_KEY,
+      "Expected PRIVATE_KEY environment variable"
+    ),
+    clientId: expect(
+      process.env.CLIENT_ID,
+      "Expected CLIENT_ID environment variable"
+    ),
+    clientSecret: expect(
+      process.env.CLIENT_SECRET,
+      "Expected CLIENT_SECRET environment variable"
+    ),
+  });
+  const installationAuth = await auth({
+    type: "installation",
+    installationId: installations[0].id,
+  });
   const { data } = await client.query({
     query: gql`
       query Repository($owner: String!, $name: String!) {
         repository(owner: $owner, name: $name) {
-          issues(
-            first: 20
-            filterBy: { states: [OPEN] }
-            orderBy: { field: CREATED_AT, direction: DESC }
-          ) {
+          issues(first: 20) {
             nodes {
-              id
-              bodyHTML
-              number
               title
             }
           }
         }
       }
     `,
+    context: { headers: { Authorization: `token ${installationAuth.token}` } },
     variables: { owner: params.owner, name: params.name },
-    context: {
-      headers: {
-        Authorization: `bearer ${session.data.accessToken}`,
-      },
-    },
   });
+
   return {
     owner: params.owner,
     name: params.name,

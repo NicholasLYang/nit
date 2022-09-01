@@ -102,6 +102,9 @@ export default function Issues() {
     };
   }, [previewedIssues, selectedIssue]);
 
+  if (issues.length === 0) {
+    return <div className="flex-grow">No issues, go <span className="font-bold">b</span>ack</div>
+  }
   return (
     <div className="flex flex-col items-center pb-10">
       <div className="flex p-10">

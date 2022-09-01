@@ -1,3 +1,3 @@
 export interface Issue {
-  title: string
+  title: string;
 }
