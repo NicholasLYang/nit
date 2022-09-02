@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useOutletContext, useParams, useSubmit } from "@remix-run/react";
 import { classNames, isInViewport } from "~/utils";
+import KeyIcon from "~/components/KeyIcon";
 
 export default function Issues() {
-  const issues = useOutletContext();
+  const { issues } = useOutletContext();
   const submit = useSubmit();
   const params = useParams();
   const selectedRef = useRef(null);
@@ -103,7 +104,11 @@ export default function Issues() {
   }, [previewedIssues, selectedIssue]);
 
   if (issues.length === 0) {
-    return <div className="flex-grow">No issues, go <span className="font-bold">b</span>ack</div>
+    return (
+      <div className="flex-grow">
+        No issues, go <KeyIcon>b</KeyIcon>ack
+      </div>
+    );
   }
   return (
     <div className="flex flex-col items-center pb-10">

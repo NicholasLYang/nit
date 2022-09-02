@@ -1,20 +1,27 @@
 import { Link, useParams } from "@remix-run/react";
+import KeyIcon from "~/components/KeyIcon";
 
 export default function Index() {
   const params = useParams();
   return (
-    <div className="grid-template-rows-3 grid grow">
+    <div className="flex grow flex-wrap space-x-5">
       <Link
         to={`/${params.owner}/${params.name}/issues`}
         className="flex h-60 w-60 items-center justify-center rounded text-xl shadow"
       >
-        <span className="font-bold">h</span>ome
+        <KeyIcon>h</KeyIcon>ome
       </Link>
       <Link
         to={`/${params.owner}/${params.name}/issues`}
         className="flex h-60 w-60 items-center justify-center rounded text-xl shadow"
       >
-        <span className="font-bold">i</span>ssues
+        <KeyIcon>i</KeyIcon>ssues
+      </Link>
+      <Link
+        to={`/${params.owner}/${params.name}/pulls`}
+        className="flex h-60 w-60 items-center justify-center rounded text-xl shadow"
+      >
+        <KeyIcon>p</KeyIcon>ull requests
       </Link>
     </div>
   );

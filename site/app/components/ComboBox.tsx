@@ -7,10 +7,10 @@ import Fuse from "fuse.js";
 interface Props {
   items: Array<{ id: string; name: string }>;
   placeholder?: string;
-  selectedItem: string | undefined;
-  setSelectedItem: Dispatch<SetStateAction<string | undefined>>;
+  selectedItem: object | undefined;
+  setSelectedItem: Dispatch<SetStateAction<object | undefined>>;
   tabIndex?: number;
-  innerRef?: MutableRefObject<any>
+  innerRef?: MutableRefObject<any>;
 }
 
 export default function ComboBox({
@@ -19,7 +19,7 @@ export default function ComboBox({
   selectedItem,
   setSelectedItem,
   tabIndex,
-  innerRef
+  innerRef,
 }: Props) {
   const fuse = new Fuse(items, { keys: ["name"] });
   const [query, setQuery] = useState("");

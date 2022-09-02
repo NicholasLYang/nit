@@ -53,7 +53,9 @@ export async function action({ request }: ActionArgs) {
 }
 
 export default function Index() {
-  const [selectedItem, setSelectedItem] = useState<string | undefined>();
+  const [selectedItem, setSelectedItem] = useState<
+    { nameWithOwner: string } | undefined
+  >();
   const submit = useSubmit();
   const repositories = useLoaderData();
   const ref = useRef(null);
@@ -63,10 +65,6 @@ export default function Index() {
       ref.current.focus();
     }
   }, [ref]);
-
-  const handleSubmit = useCallback(() => {
-    submit(null, { method: "get", action: `/${selectedItem.nameWithOwner}` });
-  }, [selectedItem, submit]);
 
   return (
     <main>
@@ -79,9 +77,9 @@ export default function Index() {
         </button>
       </form>
       <div className="flex h-screen items-center justify-center">
-        <div className="flex flex-col items-center text-center">
+        <div className="mb-20 flex flex-col items-center text-center">
           <h1 className="text-2xl">GitFocus</h1>
-          <form onSubmit={handleSubmit}>
+          <form method="get" action={`/${selectedItem?.nameWithOwner}`}>
             <ComboBox
               innerRef={ref}
               tabIndex={100}
@@ -90,7 +88,13 @@ export default function Index() {
               selectedItem={selectedItem}
               setSelectedItem={setSelectedItem}
             />
-            <button type="submit">Submit</button>
+            <button
+              disabled={selectedItem === undefined}
+              className="hidden"
+              type="submit"
+            >
+              Submit
+            </button>
           </form>
         </div>
       </div>

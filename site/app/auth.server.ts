@@ -28,7 +28,10 @@ authenticator.use(
         process.env.CLIENT_SECRET,
         "Expected CLIENT_SECRET environment variable"
       ),
-      callbackURL: "http://localhost:3000/auth/github/callback",
+      callbackURL: expect(
+        process.env.CALLBACK_URL,
+        "Expected CALLBACK_URL environment variable"
+      ),
     },
     async ({ accessToken }) => {
       const response = await fetch(

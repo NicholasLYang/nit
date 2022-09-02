@@ -5,6 +5,9 @@ kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
 
+[env]
+  CALLBACK_URL = "https://gitfocus.io/auth/github/callback"
+
 [experimental]
   allowed_public_ports = []
   auto_rollback = true

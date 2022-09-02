@@ -1,7 +1,14 @@
 export default function KeyIcon({ children }) {
   return (
-    <div className="flex flex h-5 w-5 items-center justify-center rounded border">
+    <kbd
+      style={{
+        borderRadius: "3px",
+        padding: "1px 2px 0",
+        border: "1px solid black",
+        marginRight: "1px",
+      }}
+    >
       {children}
-    </div>
+    </kbd>
   );
 }

@@ -31,11 +31,21 @@ export async function loader({ params, request }: LoaderArgs) {
     type: "installation",
     installationId: installations[0].id,
   });
+  console.log(installationAuth.token);
   const { data } = await client.query({
     query: gql`
       query Repository($owner: String!, $name: String!) {
         repository(owner: $owner, name: $name) {
           issues(first: 20) {
+            nodes {
+              title
+            }
+          }
+          pullRequests(
+            states: [OPEN]
+            orderBy: { field: UPDATED_AT, direction: DESC }
+            first: 20
+          ) {
             nodes {
               title
             }
@@ -51,12 +61,13 @@ export async function loader({ params, request }: LoaderArgs) {
     owner: params.owner,
     name: params.name,
     issues: data.repository.issues.nodes,
+    pullRequests: data.repository.pullRequests.nodes,
   };
 }
 
 export default function Repository() {
   const submit = useSubmit();
-  const { owner, name, issues } = useLoaderData();
+  const { owner, name, issues, pullRequests } = useLoaderData();
 
   const handleKeyPress = useCallback((event) => {
     switch (event.keyCode) {
@@ -68,6 +79,11 @@ export default function Repository() {
       case 72: {
         // h
         submit(null, { method: "get", action: `/` });
+        break;
+      }
+      case 80: {
+        // p
+        submit(null, { method: "get", action: `/${owner}/${name}/pulls` });
         break;
       }
     }
@@ -85,12 +101,12 @@ export default function Repository() {
 
   return (
     <main className="flex h-screen flex-col items-center justify-between">
-      <div className="flex grow items-center">
+      <div className="flex items-center p-5 pb-20">
         <h1 className="pt-5">
           <span className="font-bold">{owner}</span> / {name}
         </h1>
       </div>
-      <Outlet context={issues} />
+      <Outlet context={{ issues, pullRequests }} />
     </main>
   );
 }
