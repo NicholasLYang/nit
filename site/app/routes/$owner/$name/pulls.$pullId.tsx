@@ -1,8 +1,11 @@
-import { useLoaderData, useParams } from "@remix-run/react";
+import { useLoaderData, useSubmit } from "@remix-run/react";
 import { gql } from "@apollo/client";
 import client from "~/apollo-client";
 import { LoaderArgs } from "@remix-run/node";
 import { authenticator } from "~/auth.server";
+import { useHotkeys } from "react-hotkeys-hook";
+import KeyIcon from "~/components/KeyIcon";
+import sanitizeHtml from "sanitize-html";
 
 export async function loader({ params, request }: LoaderArgs) {
   const { installations } = await authenticator.isAuthenticated(request, {
@@ -37,7 +40,6 @@ export async function loader({ params, request }: LoaderArgs) {
     },
   });
 
-  console.log(installation.token);
   return {
     owner: params.owner,
     name: params.name,
@@ -48,15 +50,37 @@ export async function loader({ params, request }: LoaderArgs) {
 
 export default function PullRequestPage() {
   const { owner, name, pullRequest, pullId } = useLoaderData();
+  const submit = useSubmit();
+
+  useHotkeys("b", () => {
+    submit(null, { method: "get", action: `/${owner}/${name}/pulls` });
+  });
+
   return (
     <div>
+      <div className="space-x-7 pb-5">
+        <span>
+          <KeyIcon>b</KeyIcon>ack
+        </span>
+        <span>
+          <KeyIcon>Tab</KeyIcon> Navigate forward
+        </span>
+        <span>
+          <KeyIcon>Shift</KeyIcon>
+          <KeyIcon>Tab</KeyIcon> Navigate backward
+        </span>
+      </div>
       <h1 className="text-xl">
         #{pullId}{" "}
-        <span dangerouslySetInnerHTML={{ __html: pullRequest.titleHTML }} />
+        <span
+          dangerouslySetInnerHTML={{
+            __html: sanitizeHtml(pullRequest.titleHTML),
+          }}
+        />
       </h1>
       <p
         className="max-w-xl"
-        dangerouslySetInnerHTML={{ __html: pullRequest.bodyHTML }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(pullRequest.bodyHTML) }}
       />
     </div>
   );

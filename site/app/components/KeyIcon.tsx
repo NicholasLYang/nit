@@ -2,10 +2,15 @@ export default function KeyIcon({ children }) {
   return (
     <kbd
       style={{
-        borderRadius: "3px",
-        padding: "1px 2px 0",
-        border: "1px solid black",
-        marginRight: "1px",
+        border: "2px solid #1e293b",
+        boxShadow: "1px 1px #1e293b",
+        fontSize: ".85em",
+        lineHeight: ".85em",
+        display: "inline-block",
+        fontWeight: 600,
+        letterSpacing: ".05em",
+        padding: "3px 5px",
+        whiteSpace: "nowrap",
       }}
     >
       {children}

@@ -1,24 +1,26 @@
 import { useOutletContext, useParams, useSubmit } from "@remix-run/react";
 import KeyIcon from "~/components/KeyIcon";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { ListCommands } from "~/components/ListCommands";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export default function PullRequests() {
   const { pullRequests } = useOutletContext();
   const params = useParams();
   const submit = useSubmit();
+  const [selectedPullRequest, setSelectedPullRequest] = useState(0);
+
+  useHotkeys("b", () => {
+    // b
+    submit(null, {
+      method: "get",
+      action: `/${params.owner}/${params.name}`,
+    });
+  });
 
   const handleKeyPress = useCallback(
     (event) => {
-      // b
-      if (event.keyCode === 66) {
-        {
-          // b
-          submit(null, {
-            method: "get",
-            action: `/${params.owner}/${params.name}`,
-          });
-        }
-      } else if (event.keyCode >= 48 && event.keyCode <= 57) {
+      if (event.keyCode >= 48 && event.keyCode <= 57) {
         const index = event.keyCode - 48;
         const prNumber = pullRequests[index].number;
 
@@ -51,6 +53,7 @@ export default function PullRequests() {
 
   return (
     <div className="flex-grow">
+      <ListCommands />
       <ul>
         {pullRequests.map((pr, index) => (
           <li key={pr.id} className="m-2 flex justify-between p-2 shadow">

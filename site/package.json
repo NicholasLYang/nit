@@ -49,6 +49,7 @@
     "react-hotkeys-hook": "^3.4.7",
     "remix-auth": "^3.2.2",
     "remix-auth-github": "^1.1.1",
+    "sanitize-html": "^2.7.1",
     "tiny-invariant": "^1.2.0"
   },
   "devDependencies": {

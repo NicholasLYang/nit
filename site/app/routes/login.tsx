@@ -21,7 +21,7 @@ export default function LoginPage() {
     <div className="flex h-screen flex-col items-center justify-center">
       <Form method="post" action="/auth/github">
         <button>
-          <KeyIcon>S</KeyIcon>ign In
+          <KeyIcon>S</KeyIcon> Sign in
         </button>
       </Form>
     </div>

@@ -7,10 +7,13 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useSubmit,
 } from "@remix-run/react";
 
 import tailwindStylesheetUrl from "./styles/tailwind.css";
 import { getUser } from "./session.server";
+import { useEffect } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
@@ -18,7 +21,7 @@ export const links: LinksFunction = () => {
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
-  title: "nit",
+  title: "gitfocus",
   viewport: "width=device-width,initial-scale=1",
 });
 
@@ -29,6 +32,9 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export default function App() {
+  useHotkeys("g", () => {
+    window.location.href = `https://github.com${window.location.pathname}`;
+  });
   return (
     <html lang="en" className="h-full">
       <head>

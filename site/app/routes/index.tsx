@@ -17,10 +17,6 @@ enum HomeDataType {
   Installations,
 }
 
-function getRandomRepository(repositories: object[]) {
-  return repositories[Math.floor(Math.random() * repositories.length)];
-}
-
 export async function loader({ request }: LoaderArgs) {
   const { accessToken } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
@@ -47,12 +43,17 @@ export async function loader({ request }: LoaderArgs) {
       `,
       context: { headers: { Authorization: `token ${accessToken}` } },
     });
-    return data.viewer.repositories.nodes;
+
+    const repositories = data.viewer.repositories.nodes;
+    const randomIndex = Math.floor(Math.random() * repositories.length);
+
+    return { repositories, randomIndex };
   } catch (e) {
     if (e.networkError.statusCode) {
       return logout(request);
     }
-    return [];
+
+    throw e;
   }
 }
 
@@ -66,7 +67,7 @@ export default function Index() {
     { nameWithOwner: string } | undefined
   >();
 
-  const repositories = useLoaderData();
+  const { repositories, randomIndex } = useLoaderData();
   const ref = useRef(null);
   const submit = useSubmit();
 
@@ -102,9 +103,7 @@ export default function Index() {
             <ComboBox
               innerRef={ref}
               tabIndex={100}
-              placeholder={
-                getRandomRepository(repositories)?.name || "repository"
-              }
+              placeholder={repositories[randomIndex]?.name || "repository"}
               items={repositories}
               selectedItem={selectedItem}
               setSelectedItem={setSelectedItem}

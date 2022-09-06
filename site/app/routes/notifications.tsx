@@ -14,7 +14,7 @@ export async function loader({ request }: LoaderArgs) {
 
 export default function NotificationsPage() {
   const data = useLoaderData();
-  console.log(data);
+
   return (
     <main>
       <h1>Notifications</h1>
