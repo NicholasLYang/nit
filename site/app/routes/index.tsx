@@ -92,13 +92,21 @@ export default function Index() {
   return (
     <main>
       <form className="ml-10" method="post" action="/logout">
-        <button type="submit" className="mt-5 rounded-lg border p-5 shadow">
+        <button
+          type="submit"
+          style={{
+            border: "2px solid #1e293b",
+            boxShadow: "1px 1px #1e293b",
+            fontWeight: 600,
+          }}
+          className="mt-5 p-3"
+        >
           Log out <span className="text-slate-400">&#8984;B</span>
         </button>
       </form>
       <div className="flex h-screen items-center justify-center">
         <div className="mb-20 flex flex-col items-center text-center">
-          <h1 className="text-2xl">GitFocus</h1>
+          <h1 className="text-2xl font-semibold">gitgot</h1>
           <form method="get" action={`/${selectedItem?.nameWithOwner}`}>
             <ComboBox
               innerRef={ref}

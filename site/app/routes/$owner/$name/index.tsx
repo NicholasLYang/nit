@@ -1,9 +1,10 @@
-import { Link, useParams, useSubmit } from "@remix-run/react";
+import { Link, useOutletContext, useParams, useSubmit } from "@remix-run/react";
 import KeyIcon from "~/components/KeyIcon";
 import { useHotkeys } from "react-hotkeys-hook";
 
 export default function Index() {
   const { owner, name } = useParams();
+  const { readMe } = useOutletContext();
   const submit = useSubmit();
 
   useHotkeys("i", () => {
@@ -20,16 +21,19 @@ export default function Index() {
   });
 
   return (
-    <div className="flex grow flex-wrap space-x-7">
-      <Link to={"/"}>
-        <KeyIcon>b</KeyIcon> Home
-      </Link>
-      <Link to={`/${owner}/${name}/issues`}>
-        <KeyIcon>i</KeyIcon> Issues
-      </Link>
-      <Link to={`/${owner}/${name}/pulls`}>
-        <KeyIcon>p</KeyIcon> Pull requests
-      </Link>
-    </div>
+    <>
+      <div className="flex flex-wrap space-x-7 pb-5">
+        <Link to={"/"}>
+          <KeyIcon>b</KeyIcon> Home
+        </Link>
+        <Link to={`/${owner}/${name}/issues`}>
+          <KeyIcon>i</KeyIcon> Issues
+        </Link>
+        <Link to={`/${owner}/${name}/pulls`}>
+          <KeyIcon>p</KeyIcon> Pull requests
+        </Link>
+      </div>
+      <pre className="w-2/3 whitespace-pre-wrap py-5">{readMe}</pre>
+    </>
   );
 }

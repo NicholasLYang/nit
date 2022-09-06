@@ -6,6 +6,11 @@ import { useHotkeys } from "react-hotkeys-hook";
 import sanitizeHtml from "sanitize-html";
 import { ListCommands } from "~/components/ListCommands";
 
+interface IssuesState {
+  selectedIssue: number;
+  peekedIssue: number | undefined;
+}
+
 export default function Issues() {
   const { issues } = useOutletContext();
   const submit = useSubmit();
@@ -15,10 +20,13 @@ export default function Issues() {
   const nextSelectedRef = useRef(null);
   const previousSelectedRef = useRef(null);
 
-  const [{ selectedIssue, previewedIssues }, setIssueState] = useState({
-    selectedIssue: 0,
-    previewedIssues: new Set(),
-  });
+  const [{ selectedIssue, peekedIssue }, setIssueState] = useState<IssuesState>(
+    {
+      selectedIssue: 0,
+      // Issue that has the description expanded
+      peekedIssue: undefined,
+    }
+  );
 
   const getRef = useCallback(
     (i: number) => {
@@ -57,9 +65,9 @@ export default function Issues() {
   useHotkeys(
     "k",
     () => {
-      setIssueState(({ previewedIssues, selectedIssue }) => ({
+      setIssueState(({ peekedIssue, selectedIssue }) => ({
         selectedIssue: (selectedIssue + 1) % issues.length,
-        previewedIssues,
+        peekedIssue,
       }));
 
       if (nextSelectedRef.current) {
@@ -77,11 +85,29 @@ export default function Issues() {
   );
 
   useHotkeys(
+    "space",
+    () => {
+      if (selectedIssue === peekedIssue) {
+        setIssueState((issueState) => ({
+          ...issueState,
+          peekedIssue: undefined,
+        }));
+      } else {
+        setIssueState((issueState) => ({
+          ...issueState,
+          peekedIssue: issueState.selectedIssue,
+        }));
+      }
+    },
+    [selectedIssue, peekedIssue]
+  );
+
+  useHotkeys(
     "j",
     () => {
-      setIssueState(({ previewedIssues, selectedIssue }) => ({
+      setIssueState(({ peekedIssue, selectedIssue }) => ({
         selectedIssue: (selectedIssue + issues.length - 1) % issues.length,
-        previewedIssues,
+        peekedIssue,
       }));
 
       if (previousSelectedRef.current) {
@@ -100,7 +126,8 @@ export default function Issues() {
   if (issues.length === 0) {
     return (
       <div className="flex-grow">
-        No issues, go <KeyIcon>b</KeyIcon>ack
+        No issues, go <KeyIcon>b</KeyIcon>
+        <span className="pl-1">ack</span>
       </div>
     );
   }
@@ -129,10 +156,12 @@ export default function Issues() {
                   }}
                 />
               </div>
-              {previewedIssues.has(i) && (
+              {peekedIssue === i && (
                 <div
-                  className="mt-5 overflow-auto bg-slate-100 p-6"
-                  dangerouslySetInnerHTML={{ __html: issue.bodyHTML }}
+                  className="mt-5 max-h-96 truncate bg-slate-100 p-6"
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(issue.bodyHTML),
+                  }}
                 />
               )}
             </Link>

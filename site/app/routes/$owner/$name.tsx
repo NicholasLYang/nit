@@ -22,6 +22,9 @@ export async function loader({ params, request }: LoaderArgs) {
       query Repository($owner: String!, $name: String!) {
         repository(owner: $owner, name: $name) {
           name
+          defaultBranchRef {
+            name
+          }
           issues(first: 20) {
             nodes {
               id
@@ -56,16 +59,24 @@ export async function loader({ params, request }: LoaderArgs) {
     variables: { owner: params.owner, name: params.name },
   });
 
+  const defaultBranch = data.repository.defaultBranchRef.name;
+
+  const readMeRequest = await fetch(
+    `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/README.md`
+  );
+  const readMe = await readMeRequest.text();
+
   return {
     owner: params.owner,
     name: params.name,
     issues: data.repository.issues.nodes,
     pullRequests: data.repository.pullRequests.nodes,
+    readMe,
   };
 }
 
 export default function Repository() {
-  const { owner, name, issues, pullRequests } = useLoaderData();
+  const { owner, name, issues, pullRequests, readMe } = useLoaderData();
 
   return (
     <main className="flex h-screen flex-col items-center">
@@ -74,7 +85,7 @@ export default function Repository() {
           <span className="font-bold">{owner}</span> / {name}
         </h1>
       </div>
-      <Outlet context={{ issues, pullRequests }} />
+      <Outlet context={{ issues, pullRequests, readMe }} />
     </main>
   );
 }

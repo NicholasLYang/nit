@@ -1,11 +1,10 @@
 import { Authenticator } from "remix-auth";
-import { getSession, logout, sessionStorage } from "~/session.server";
+import { logout, sessionStorage } from "~/session.server";
 import { expect } from "~/utils";
 import { GitHubStrategy } from "remix-auth-github";
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/rest";
 import { Params } from "react-router";
-import { createSession } from "@remix-run/server-runtime";
 
 interface User {
   accessToken: string;
@@ -76,15 +75,13 @@ export const octokit = new Octokit({
   },
 });
 
-async function getUserInstallations({ accessToken, ...rest }) {
+async function getUserInstallations({ accessToken }) {
   const response = await fetch("https://api.github.com/user/installations", {
     headers: {
       Authorization: `token ${accessToken}`,
     },
   });
-
   const userInstallations = await response.json();
-
   const auth = createAppAuth({
     appId: expect(process.env.APP_ID, "Expected APP_ID environment variable"),
     privateKey: PRIVATE_KEY,

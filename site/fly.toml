@@ -6,7 +6,7 @@ kill_timeout = 5
 processes = []
 
 [env]
-  CALLBACK_URL = "https://gitfocus.io/auth/github/callback"
+  CALLBACK_URL = "https://gitgot.io/auth/github/callback"
 
 [experimental]
   allowed_public_ports = []

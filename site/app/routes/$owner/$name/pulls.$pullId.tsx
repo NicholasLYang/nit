@@ -58,19 +58,12 @@ export default function PullRequestPage() {
 
   return (
     <div>
-      <div className="space-x-7 pb-5">
+      <div className="space-x-7 pb-10">
         <span>
-          <KeyIcon>b</KeyIcon>ack
-        </span>
-        <span>
-          <KeyIcon>Tab</KeyIcon> Navigate forward
-        </span>
-        <span>
-          <KeyIcon>Shift</KeyIcon>
-          <KeyIcon>Tab</KeyIcon> Navigate backward
+          <KeyIcon>b</KeyIcon> Go back
         </span>
       </div>
-      <h1 className="text-xl">
+      <h1 className="text-2xl font-semibold">
         #{pullId}{" "}
         <span
           dangerouslySetInnerHTML={{
@@ -78,6 +71,9 @@ export default function PullRequestPage() {
           }}
         />
       </h1>
+      {pullRequest.bodyHTML === "" && (
+        <p className="py-6 italic">No description provided.</p>
+      )}
       <p
         className="max-w-xl"
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(pullRequest.bodyHTML) }}
