@@ -77,9 +77,6 @@ export const octokit = new Octokit({
 });
 
 async function getUserInstallations({ accessToken, ...rest }) {
-  console.log("--------------");
-  console.log("GOT ACCESS TOKEN" + accessToken);
-  console.log(rest);
   const response = await fetch("https://api.github.com/user/installations", {
     headers: {
       Authorization: `token ${accessToken}`,
@@ -87,7 +84,6 @@ async function getUserInstallations({ accessToken, ...rest }) {
   });
 
   const userInstallations = await response.json();
-  console.log("USER INSTALLATIONS");
 
   const auth = createAppAuth({
     appId: expect(process.env.APP_ID, "Expected APP_ID environment variable"),
@@ -102,30 +98,22 @@ async function getUserInstallations({ accessToken, ...rest }) {
     ),
   });
 
-  let installKeys;
-  try {
-    installKeys = await Promise.all(
-      userInstallations.installations.map((install) =>
-        auth({
-          type: "installation",
-          installationId: install.id,
-        })
-      )
-    );
-  } catch (e) {
-    console.error(e);
-    console.log(e);
-    throw e;
-  }
+  const installKeys = await Promise.all(
+    userInstallations.installations.map((install) =>
+      auth({
+        type: "installation",
+        installationId: install.id,
+      })
+    )
+  );
 
-  console.log(installKeys);
   const installations = userInstallations.installations.map((i, index) => ({
     id: i.id,
     account: i.account,
     token: installKeys[index].token,
     expiresAt: installKeys[index].expiresAt,
   }));
-  console.log("--------------");
+
   return { accessToken, installations };
 }
 
