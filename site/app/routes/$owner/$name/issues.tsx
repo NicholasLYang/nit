@@ -125,9 +125,10 @@ export default function Issues() {
 
   if (issues.length === 0) {
     return (
-      <div className="flex-grow">
-        No issues, go <KeyIcon>b</KeyIcon>
-        <span className="pl-1">ack</span>
+      <div className="flex items-center">
+        <span className="pr-1">No issues open, go</span>
+        <KeyIcon>b</KeyIcon>
+        <span style={{ paddingLeft: "1.5px" }}>ack?</span>
       </div>
     );
   }

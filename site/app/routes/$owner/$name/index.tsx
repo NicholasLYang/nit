@@ -24,7 +24,7 @@ export default function Index() {
     <>
       <div className="flex flex-wrap space-x-7 pb-5">
         <Link to={"/"}>
-          <KeyIcon>b</KeyIcon> Home
+          <KeyIcon>b</KeyIcon> Back Home
         </Link>
         <Link to={`/${owner}/${name}/issues`}>
           <KeyIcon>i</KeyIcon> Issues

@@ -45,15 +45,17 @@ export default function PullRequests() {
 
   if (pullRequests.length === 0) {
     return (
-      <div className="flex flex-grow items-center">
-        No pull requests open. Go <KeyIcon>b</KeyIcon>ack?
+      <div className="flex items-center">
+        <span className="pr-1">No pull requests open, go </span>
+        <KeyIcon>b</KeyIcon>
+        <span style={{ paddingLeft: "1.5px" }}>ack?</span>
       </div>
     );
   }
 
   return (
     <div className="flex-grow">
-      <ListCommands />
+      <ListCommands backTo="Repo" />
       <ul>
         {pullRequests.map((pr, index) => (
           <li key={pr.id} className="m-2 flex justify-between p-2 shadow">
