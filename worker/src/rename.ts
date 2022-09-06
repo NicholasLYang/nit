@@ -50,13 +50,17 @@ async function sendRequest<P, R, PR, E, RO>(
   type: ProtocolRequestType<P, R, PR, E, RO>,
   params: P
 ) {
-  let waitTime = 50;
+  let waitTime = 1000;
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
       // eslint-disable-next-line no-await-in-loop
       return await connection.sendRequest(type, params);
     } catch (e: any) {
+      if (process.env.LOG_LEVEL === "error") {
+        console.error(e);
+      }
+
       if (
         e.message !== "waiting for cargo metadata or cargo check" &&
         e.message !== "content modified"
@@ -83,7 +87,7 @@ async function initializeConnection(
     });
   }
 
-  if (process.env.LOG_LEVEL === "error") {
+  if (process.env.LOG_LEVEL === "error" || process.env.LOG_LEVEL === "info") {
     lspProcess.stderr.on("data", (data) => {
       console.error(`stderr: ${data}`);
     });

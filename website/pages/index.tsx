@@ -1,64 +1,50 @@
 import Head from "next/head";
-import styles from "../styles/Home.module.css";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Parser from "web-tree-sitter";
+import { classNames } from "../components/utils";
+import { useRouter } from "next/router";
 
-enum LoadingState {
-  Loading,
-  Done,
-  Error,
+// enum LoadingState {
+//   Loading,
+//   Done,
+//   Error,
+// }
+//
+// type ParserState =
+//   | { loadingState: LoadingState.Loading }
+//   | { loadingState: LoadingState.Done; parser: Parser }
+//   | { loadingState: LoadingState.Error; error: Error };
+
+enum ActionType {
+  Search = "search",
+  Open = "repo",
+  About = "about",
 }
 
-type ParserState =
-  | { loadingState: LoadingState.Loading }
-  | { loadingState: LoadingState.Done; parser: Parser }
-  | { loadingState: LoadingState.Error; error: Error };
-
 function Home() {
-  const [code, setCode] = useState("");
-  const [parserState, setParserState] = useState<ParserState>({
-    loadingState: LoadingState.Loading,
-  });
+  const [owner, setOwner] = useState("");
+  const [repoName, setRepoName] = useState("");
 
-  useEffect(() => {
-    async function run() {
-      await Parser.init({
-        locateFile(path: string) {
-          return path;
-        },
-      });
-      const parser = new Parser();
-      const result = await fetch("/tree-sitter-rust.wasm");
-      const rustBytes = new Uint8Array(await result.arrayBuffer());
-      const Rust = await Parser.Language.load(rustBytes);
-      parser.setLanguage(Rust);
-      setParserState({ loadingState: LoadingState.Done, parser });
-    }
-
-    run();
-  }, []);
-
+  const handleSubmit = useCallback(() => {});
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
-        <title>Nit: Refactor Code Quickly</title>
-        <meta name="description" content="Nit, a no-code editor for code" />
+        <title>Nit: No nonsense GitHub</title>
+        <meta
+          name="description"
+          content="Nit, a no-nonsense GitHub front end"
+        />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>Refactor Code Quickly</h1>
+      <main className="p-2">
+        <div>Enter repository owner and name</div>
+        <div>Press enter to go</div>
+        <form onSubmit={handleSubmit} className="space-x-2 p-2">
+          <input type="text" value={owner} placeholder="facebook" />
+          <input type="text" value={repoName} placeholder="react" />l
+        </form>
       </main>
-      {parserState.loadingState === LoadingState.Done && (
-        <div>
-          <input
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-          />
-          <pre>{parserState.parser.parse(code).rootNode.toString()}</pre>
-        </div>
-      )}
     </div>
   );
 }
