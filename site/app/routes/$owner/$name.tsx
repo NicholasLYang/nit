@@ -1,8 +1,15 @@
-import { Outlet, useLoaderData, useSubmit } from "@remix-run/react";
+import {
+  Link,
+  Outlet,
+  useLoaderData,
+  useLocation,
+  useSubmit,
+} from "@remix-run/react";
 import { LoaderArgs, redirect } from "@remix-run/node";
 import { gql } from "@apollo/client";
 import client from "~/apollo-client";
 import { getInstallationToken } from "~/auth.server";
+import KeyIcon from "~/components/KeyIcon";
 
 export async function loader({ params, request }: LoaderArgs) {
   const result = await getInstallationToken(request, params);
@@ -60,11 +67,16 @@ export async function loader({ params, request }: LoaderArgs) {
   });
 
   const defaultBranch = data.repository.defaultBranchRef.name;
-
   const readMeRequest = await fetch(
     `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/README.md`
   );
-  const readMe = await readMeRequest.text();
+
+  let readMe;
+  if (readMeRequest.status === 404) {
+    readMe = "No README found";
+  } else {
+    readMe = await readMeRequest.text();
+  }
 
   return {
     owner: params.owner,
@@ -77,9 +89,18 @@ export async function loader({ params, request }: LoaderArgs) {
 
 export default function Repository() {
   const { owner, name, issues, pullRequests, readMe } = useLoaderData();
+  const location = useLocation();
 
   return (
     <main className="flex h-screen flex-col items-center">
+      <div className="flex flex-wrap space-x-7 self-start p-5">
+        <a href={`https://github.com/${location.pathname}`}>
+          <KeyIcon>g</KeyIcon> Go To GitHub
+        </a>
+        <Link to={`/feedback`}>
+          <KeyIcon>f</KeyIcon> Feedback
+        </Link>
+      </div>
       <div className="flex items-center p-5 pb-16">
         <h1 className="pt-5">
           <span className="font-bold">{owner}</span> / {name}

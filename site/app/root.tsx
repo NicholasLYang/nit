@@ -32,8 +32,14 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export default function App() {
+  const submit = useSubmit();
+
   useHotkeys("g", () => {
     window.location.href = `https://github.com${window.location.pathname}`;
+  });
+
+  useHotkeys("f", () => {
+    submit(null, { method: "get", action: "/feedback" });
   });
   return (
     <html lang="en" className="h-full">

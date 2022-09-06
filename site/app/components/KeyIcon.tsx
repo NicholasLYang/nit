@@ -1,4 +1,11 @@
-export default function KeyIcon({ children }) {
+import { ReactNode } from "react";
+
+interface Props {
+  children?: ReactNode;
+  className?: string;
+}
+
+export default function KeyIcon({ children, className }: Props) {
   return (
     <kbd
       style={{
@@ -12,6 +19,7 @@ export default function KeyIcon({ children }) {
         padding: "3px 5px",
         whiteSpace: "nowrap",
       }}
+      className={className}
     >
       {children}
     </kbd>
