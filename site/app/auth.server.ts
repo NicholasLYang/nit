@@ -1,15 +1,20 @@
 import { Authenticator } from "remix-auth";
-import { sessionStorage } from "~/session.server";
+import { logout, sessionStorage } from "~/session.server";
 import { expect } from "~/utils";
 import { GitHubStrategy } from "remix-auth-github";
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/rest";
+import { Params } from "react-router";
 
 interface User {
   accessToken: string;
   installations: Array<{
     id: string;
-    account: object;
+    account: {
+      login: string;
+    };
+    token: string;
+    expiresAt: string;
   }>;
 }
 
@@ -44,10 +49,39 @@ authenticator.use(
       );
 
       const userInstallations = await response.json();
-      console.log(userInstallations.installations[0].account);
-      const installations = userInstallations.installations.map((i) => ({
+      const auth = createAppAuth({
+        appId: expect(
+          process.env.APP_ID,
+          "Expected APP_ID environment variable"
+        ),
+        privateKey: expect(
+          process.env.PRIVATE_KEY,
+          "Expected PRIVATE_KEY environment variable"
+        ),
+        clientId: expect(
+          process.env.CLIENT_ID,
+          "Expected CLIENT_ID environment variable"
+        ),
+        clientSecret: expect(
+          process.env.CLIENT_SECRET,
+          "Expected CLIENT_SECRET environment variable"
+        ),
+      });
+
+      const installKeys = await Promise.all(
+        userInstallations.installations.map((install) =>
+          auth({
+            type: "installation",
+            installationId: install.id,
+          })
+        )
+      );
+
+      const installations = userInstallations.installations.map((i, index) => ({
         id: i.id,
         account: i.account,
+        token: installKeys[index].token,
+        expiresAt: installKeys[index].expiresAt,
       }));
 
       return { accessToken, installations };
@@ -74,3 +108,26 @@ export const octokit = new Octokit({
     ),
   },
 });
+
+export async function getInstallationToken(request: Request, params: Params) {
+  const { installations } = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
+
+  const installation = installations.find(
+    (i) => i.account.login === params.owner
+  );
+
+  if (!installation) {
+    console.log(1);
+    return { error: "Cannot access repository, invalid permissions" };
+  }
+
+  if (new Date(installation.expiresAt) > new Date()) {
+    console.log(2);
+    return logout(request);
+  }
+
+  console.log(3);
+  return { token: installation.token };
+}

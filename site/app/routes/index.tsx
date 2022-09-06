@@ -1,10 +1,12 @@
 import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
 import { authenticator } from "~/auth.server";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLoaderData, useSubmit } from "@remix-run/react";
 import client from "~/apollo-client";
 import { gql } from "@apollo/client";
 import ComboBox from "~/components/ComboBox";
+import { logout } from "~/session.server";
+import { useHotkeys } from "react-hotkeys-hook";
 
 /**
  * If there is just one installation, we show the top repositories for
@@ -24,27 +26,34 @@ export async function loader({ request }: LoaderArgs) {
     failureRedirect: "/login",
   });
 
-  const { data } = await client.query({
-    query: gql`
-      query TopInstallationRepos {
-        viewer {
-          repositories(
-            first: 20
-            orderBy: { field: PUSHED_AT, direction: DESC }
-            affiliations: [OWNER]
-          ) {
-            nodes {
-              id
-              name
-              nameWithOwner
+  try {
+    const { data } = await client.query({
+      query: gql`
+        query TopInstallationRepos {
+          viewer {
+            repositories(
+              first: 20
+              orderBy: { field: PUSHED_AT, direction: DESC }
+              affiliations: [OWNER]
+            ) {
+              nodes {
+                id
+                name
+                nameWithOwner
+              }
             }
           }
         }
-      }
-    `,
-    context: { headers: { Authorization: `token ${accessToken}` } },
-  });
-  return data.viewer.repositories.nodes;
+      `,
+      context: { headers: { Authorization: `token ${accessToken}` } },
+    });
+    return data.viewer.repositories.nodes;
+  } catch (e) {
+    if (e.networkError.statusCode) {
+      return logout(request);
+    }
+    return [];
+  }
 }
 
 export async function action({ request }: ActionArgs) {
@@ -56,24 +65,34 @@ export default function Index() {
   const [selectedItem, setSelectedItem] = useState<
     { nameWithOwner: string } | undefined
   >();
-  const submit = useSubmit();
+
   const repositories = useLoaderData();
   const ref = useRef(null);
+  const submit = useSubmit();
+
+  useHotkeys("command+b", () => {
+    submit(null, { method: "post", action: "/logout" });
+  });
 
   useEffect(() => {
     if (ref.current) {
       ref.current.focus();
+
+      const onKeydown = (event) => {
+        if (event.metaKey && event.key === "b") {
+          submit(null, { method: "post", action: "/logout" });
+        }
+      };
+
+      ref.current.addEventListener("keydown", onKeydown);
     }
   }, [ref]);
 
   return (
     <main>
       <form className="ml-10" method="post" action="/logout">
-        <button
-          type="submit"
-          className="mt-5 flex items-center justify-center rounded-lg border p-5 shadow"
-        >
-          Log out
+        <button type="submit" className="mt-5 rounded-lg border p-5 shadow">
+          Log out <span className="text-slate-400">&#8984;B</span>
         </button>
       </form>
       <div className="flex h-screen items-center justify-center">
@@ -83,7 +102,9 @@ export default function Index() {
             <ComboBox
               innerRef={ref}
               tabIndex={100}
-              placeholder={getRandomRepository(repositories).name}
+              placeholder={
+                getRandomRepository(repositories)?.name || "repository"
+              }
               items={repositories}
               selectedItem={selectedItem}
               setSelectedItem={setSelectedItem}
