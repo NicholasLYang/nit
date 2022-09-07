@@ -1,10 +1,4 @@
-import {
-  Link,
-  Outlet,
-  useLoaderData,
-  useLocation,
-  useSubmit,
-} from "@remix-run/react";
+import { Link, Outlet, useLoaderData, useLocation } from "@remix-run/react";
 import { LoaderArgs, redirect } from "@remix-run/node";
 import { gql } from "@apollo/client";
 import client from "~/apollo-client";
@@ -47,7 +41,8 @@ export async function loader({ params, request }: LoaderArgs) {
           ) {
             nodes {
               id
-              title
+              titleHTML
+              bodyHTML
               number
             }
           }

@@ -75,6 +75,10 @@ export default function Index() {
     submit(null, { method: "post", action: "/logout" });
   });
 
+  useHotkeys("command+u", () => {
+    submit(null, { method: "get", action: "/feedback" });
+  });
+
   useEffect(() => {
     if (ref.current) {
       ref.current.focus();
@@ -82,6 +86,9 @@ export default function Index() {
       const onKeydown = (event) => {
         if (event.metaKey && event.key === "b") {
           submit(null, { method: "post", action: "/logout" });
+        }
+        if (event.metaKey && event.key === "u") {
+          submit(null, { method: "get", action: "/feedback" });
         }
       };
 
@@ -91,19 +98,34 @@ export default function Index() {
 
   return (
     <main>
-      <form className="ml-10" method="post" action="/logout">
-        <button
-          type="submit"
-          style={{
-            border: "2px solid #1e293b",
-            boxShadow: "1px 1px #1e293b",
-            fontWeight: 600,
-          }}
-          className="mt-5 p-3"
-        >
-          Log out <span className="text-slate-400">&#8984;B</span>
-        </button>
-      </form>
+      <div className="flex">
+        <form className="ml-10" method="post" action="/logout">
+          <button
+            type="submit"
+            style={{
+              border: "2px solid #1e293b",
+              boxShadow: "1px 1px #1e293b",
+              fontWeight: 600,
+            }}
+            className="mt-5 p-3"
+          >
+            Log out <span className="text-slate-400">&#8984;B</span>
+          </button>
+        </form>
+        <form className="ml-10" method="get" action="/feedback">
+          <button
+            type="submit"
+            style={{
+              border: "2px solid #1e293b",
+              boxShadow: "1px 1px #1e293b",
+              fontWeight: 600,
+            }}
+            className="mt-5 p-3"
+          >
+            Feedback <span className="text-slate-400">&#8984;U</span>
+          </button>
+        </form>
+      </div>
       <div className="flex h-screen items-center justify-center">
         <div className="mb-20 flex flex-col items-center text-center">
           <h1 className="text-2xl font-semibold">gitgot</h1>

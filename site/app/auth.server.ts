@@ -43,12 +43,12 @@ authenticator.use(
   "github"
 );
 
-function decodeBase64(data: string) {
+export function decodeBase64(data: string) {
   const buffer = new Buffer(data, "base64");
   return buffer.toString("ascii");
 }
 
-let PRIVATE_KEY = process.env.PRIVATE_KEY;
+export let PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 if (!PRIVATE_KEY && process.env.PRIVATE_KEY_64) {
   PRIVATE_KEY = decodeBase64(process.env.PRIVATE_KEY_64);

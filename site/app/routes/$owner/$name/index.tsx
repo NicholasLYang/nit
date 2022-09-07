@@ -10,7 +10,7 @@ export default function Index() {
   useHotkeys("i", () => {
     submit(null, { method: "get", action: `/${owner}/${name}/issues` });
   });
-  useHotkeys("b", () => {
+  useHotkeys("h", () => {
     submit(null, { method: "get", action: "/" });
   });
   useHotkeys("p", () => {
@@ -24,7 +24,7 @@ export default function Index() {
     <>
       <div className="flex flex-wrap space-x-7 pb-5">
         <Link to={"/"}>
-          <KeyIcon>b</KeyIcon> Back Home
+          <KeyIcon>h</KeyIcon> Home
         </Link>
         <Link to={`/${owner}/${name}/issues`}>
           <KeyIcon>i</KeyIcon> Issues

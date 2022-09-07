@@ -120,3 +120,11 @@ export function useKeyPress(targetKey) {
   }, []); // Empty array ensures that effect is only run on mount and unmount
   return keyPressed;
 }
+
+function capitalizeWord(str: string) {
+  return (str[0]?.toUpperCase() ?? "") + str.slice(1);
+}
+
+export function capitalize(str: string) {
+  return str.split(" ").map(capitalizeWord).join(" ");
+}

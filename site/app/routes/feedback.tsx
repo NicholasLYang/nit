@@ -8,7 +8,7 @@ export default function FeedbackPage() {
   const [isEmailCopied, setIsEmailCopied] = useState(false);
   const submit = useSubmit();
 
-  useHotkeys("b", () => {
+  useHotkeys("h", () => {
     submit(null, { method: "get", action: "/" });
   });
 
@@ -30,7 +30,7 @@ export default function FeedbackPage() {
     <div className="flex flex-col items-center p-6 text-left">
       <h1 className="text-2xl font-semibold">Feedback</h1>
       <div className="ml-16 self-start">
-        <KeyIcon>b</KeyIcon> Go back
+        <KeyIcon>h</KeyIcon> Go back
       </div>
       <div className="p-3">
         If you have any feedback, let me know! I'll do my best to fix any issues

@@ -50,7 +50,7 @@ export default function IssuePage() {
   const { owner, name } = useParams();
   const submit = useSubmit();
 
-  useHotkeys("b", () => {
+  useHotkeys("h", () => {
     submit(null, { method: "get", action: `/${owner}/${name}/issues` });
   });
 
@@ -58,7 +58,7 @@ export default function IssuePage() {
     <div className="w-2/3 max-w-xl grow">
       <div>
         <span>
-          <KeyIcon>B</KeyIcon> Back to issues
+          <KeyIcon>h</KeyIcon> Back to issues
         </span>
       </div>
       <h1
