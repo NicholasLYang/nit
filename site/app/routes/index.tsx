@@ -7,6 +7,7 @@ import { gql } from "@apollo/client";
 import ComboBox from "~/components/ComboBox";
 import { logout } from "~/session.server";
 import { useHotkeys } from "react-hotkeys-hook";
+import ActionButton from "~/components/ActionButton";
 
 /**
  * If there is just one installation, we show the top repositories for
@@ -99,32 +100,12 @@ export default function Index() {
   return (
     <main>
       <div className="flex">
-        <form className="ml-10" method="post" action="/logout">
-          <button
-            type="submit"
-            style={{
-              border: "2px solid #1e293b",
-              boxShadow: "1px 1px #1e293b",
-              fontWeight: 600,
-            }}
-            className="mt-5 p-3"
-          >
-            Log out <span className="text-slate-400">&#8984;B</span>
-          </button>
-        </form>
-        <form className="ml-10" method="get" action="/feedback">
-          <button
-            type="submit"
-            style={{
-              border: "2px solid #1e293b",
-              boxShadow: "1px 1px #1e293b",
-              fontWeight: 600,
-            }}
-            className="mt-5 p-3"
-          >
-            Feedback <span className="text-slate-400">&#8984;U</span>
-          </button>
-        </form>
+        <ActionButton method="post" action="/logout">
+          Log out <span className="text-slate-400">&#8984;B</span>
+        </ActionButton>
+        <ActionButton method="get" action="/feedback">
+          Feedback <span className="text-slate-400">&#8984;U</span>
+        </ActionButton>
       </div>
       <div className="flex h-screen items-center justify-center">
         <div className="mb-20 flex flex-col items-center text-center">

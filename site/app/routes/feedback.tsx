@@ -2,14 +2,16 @@ import KeyIcon from "~/components/KeyIcon";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useState } from "react";
 import Box from "~/components/Box";
-import { useSubmit } from "@remix-run/react";
+import { useLocation, useSubmit } from "@remix-run/react";
 
 export default function FeedbackPage() {
   const [isEmailCopied, setIsEmailCopied] = useState(false);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
   const submit = useSubmit();
 
   useHotkeys("h", () => {
-    submit(null, { method: "get", action: "/" });
+    submit(null, { method: "get", action: queryParams.get("from") || "/" });
   });
 
   useHotkeys("t", () => {
