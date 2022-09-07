@@ -15,6 +15,9 @@ export function ListCommands({ backTo }: { backTo: string }) {
       <span>
         <KeyIcon>SPACE</KeyIcon> Preview content
       </span>
+      <span>
+        <KeyIcon>ENTER</KeyIcon> Select item
+      </span>
     </div>
   );
 }

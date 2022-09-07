@@ -52,7 +52,7 @@ export default function PullRequestPage() {
   const { owner, name, pullRequest, pullId } = useLoaderData();
   const submit = useSubmit();
 
-  useHotkeys("b", () => {
+  useHotkeys("h", () => {
     submit(null, { method: "get", action: `/${owner}/${name}/pulls` });
   });
 
@@ -60,7 +60,7 @@ export default function PullRequestPage() {
     <div>
       <div className="space-x-7 pb-10">
         <span>
-          <KeyIcon>b</KeyIcon> Go back
+          <KeyIcon>h</KeyIcon> Go back
         </span>
       </div>
       <h1 className="text-2xl font-semibold">

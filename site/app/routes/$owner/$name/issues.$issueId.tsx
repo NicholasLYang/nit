@@ -58,7 +58,7 @@ export default function IssuePage() {
     <div className="w-2/3 max-w-xl grow">
       <div>
         <span>
-          <KeyIcon>h</KeyIcon> Back to issues
+          <KeyIcon>h</KeyIcon> Go back
         </span>
       </div>
       <h1

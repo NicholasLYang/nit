@@ -137,19 +137,19 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
     <div className="flex flex-col items-center pb-10">
       <h1 className="pb-10 text-3xl font-bold">{capitalize(itemName)}</h1>
       <ListCommands backTo="repo page" />
-      <ul className="w-full space-y-2">
+      <ul className="flex w-full flex-col items-center space-y-4">
         {items.map((item, i) => (
           <li
             key={item.id}
             className={classNames(
-              "max-w-2xl rounded p-2 shadow",
-              i === selectedItem && "border border-cyan-400"
+              "w-full max-w-2xl border-2 border-slate-800 p-2 shadow-block",
+              i === selectedItem && "border-blue-400"
             )}
             ref={getRef(i)}
           >
             <Link to={`/${owner}/${name}/${itemSlug}/${item.number}`}>
               <div className="flex truncate">
-                <span className="pl-2 pr-4 text-slate-300">#{item.number}</span>
+                <span className="pl-2 pr-4 text-slate-400">#{item.number}</span>
                 <div
                   dangerouslySetInnerHTML={{
                     __html: sanitizeHtml(item.titleHTML),
@@ -157,12 +157,20 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
                 />
               </div>
               {peekedItem === i && (
-                <div
-                  className="mt-5 max-h-96 truncate bg-slate-100 p-6"
-                  dangerouslySetInnerHTML={{
-                    __html: sanitizeHtml(item.bodyHTML),
-                  }}
-                />
+                <>
+                  {item.bodyHTML === "" ? (
+                    <div className="mt-5 max-h-96 truncate bg-slate-100 p-6">
+                      <span className="italic">No description provided.</span>
+                    </div>
+                  ) : (
+                    <div
+                      className="mt-5 max-h-96 truncate bg-slate-100 p-6"
+                      dangerouslySetInnerHTML={{
+                        __html: sanitizeHtml(item.bodyHTML),
+                      }}
+                    />
+                  )}
+                </>
               )}
             </Link>
           </li>
