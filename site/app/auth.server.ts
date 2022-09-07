@@ -76,11 +76,13 @@ export const octokit = new Octokit({
 });
 
 async function getUserInstallations({ accessToken }) {
+  console.log(1);
   const response = await fetch("https://api.github.com/user/installations", {
     headers: {
       Authorization: `token ${accessToken}`,
     },
   });
+
   const userInstallations = await response.json();
   const auth = createAppAuth({
     appId: expect(process.env.APP_ID, "Expected APP_ID environment variable"),

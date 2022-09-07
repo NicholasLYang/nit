@@ -9,7 +9,7 @@ import { LoaderArgs, redirect } from "@remix-run/node";
 import { gql } from "@apollo/client";
 import client from "~/apollo-client";
 import { getInstallationToken } from "~/auth.server";
-import KeyIcon from "~/components/KeyIcon";
+import { Converter } from "showdown";
 import ActionButton from "~/components/ActionButton";
 import { useHotkeys } from "react-hotkeys-hook";
 
@@ -31,6 +31,7 @@ export async function loader({ params, request }: LoaderArgs) {
       query Repository($owner: String!, $name: String!) {
         repository(owner: $owner, name: $name) {
           name
+          hasIssuesEnabled
           defaultBranchRef {
             name
           }
@@ -78,12 +79,15 @@ export async function loader({ params, request }: LoaderArgs) {
   if (readMeRequest.status === 404) {
     readMe = "No README found";
   } else {
-    readMe = await readMeRequest.text();
+    const readMeMarkdown = await readMeRequest.text();
+    const converter = new Converter();
+    readMe = converter.makeHtml(readMeMarkdown);
   }
 
   return {
     owner: params.owner,
     name: params.name,
+    hasIssuesEnabled: data.repository.hasIssuesEnabled,
     issues: data.repository.issues.nodes,
     pullRequests: data.repository.pullRequests.nodes,
     readMe,
@@ -91,7 +95,8 @@ export async function loader({ params, request }: LoaderArgs) {
 }
 
 export default function Repository() {
-  const { owner, name, issues, pullRequests, readMe } = useLoaderData();
+  const { owner, name, issues, pullRequests, readMe, hasIssuesEnabled } =
+    useLoaderData();
   const submit = useSubmit();
   const location = useLocation();
 
@@ -132,7 +137,7 @@ export default function Repository() {
           <span className="font-bold">{owner}</span> / {name}
         </h1>
       </div>
-      <Outlet context={{ issues, pullRequests, readMe }} />
+      <Outlet context={{ issues, pullRequests, readMe, hasIssuesEnabled }} />
     </main>
   );
 }

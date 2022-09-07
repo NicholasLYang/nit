@@ -1,0 +1,11 @@
+.box {
+  border: 2px solid #1e293b;
+  box-shadow: 1px 1px #1e293b;
+  font-size: .85em;
+  line-height: .85em;
+  display: inline-block;
+  font-weight: 600;
+  letter-spacing: .05em;
+  padding: 3px 5px;
+  white-space: nowrap;
+}

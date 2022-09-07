@@ -42,6 +42,7 @@ export async function loader({ request }: LoaderArgs) {
           }
         }
       `,
+      fetchPolicy: "no-cache",
       context: { headers: { Authorization: `token ${accessToken}` } },
     });
 
@@ -110,7 +111,11 @@ export default function Index() {
       <div className="flex h-screen items-center justify-center">
         <div className="mb-20 flex flex-col items-center text-center">
           <h1 className="text-2xl font-semibold">gitgot</h1>
-          <form method="get" action={`/${selectedItem?.nameWithOwner}`}>
+          <form
+            className="flex"
+            method="get"
+            action={`/${selectedItem?.nameWithOwner}`}
+          >
             <ComboBox
               innerRef={ref}
               tabIndex={100}
@@ -120,11 +125,11 @@ export default function Index() {
               setSelectedItem={setSelectedItem}
             />
             <button
+              className="box m-2 disabled:bg-black disabled:text-white"
               disabled={selectedItem === undefined}
-              className="hidden"
               type="submit"
             >
-              Submit
+              ENTER
             </button>
           </form>
         </div>

@@ -12,11 +12,14 @@ import {
 
 import tailwindStylesheetUrl from "./styles/tailwind.css";
 import { getUser } from "./session.server";
-import { useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import styles from "~/styles/index.css";
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
+  return [
+    { rel: "stylesheet", href: tailwindStylesheetUrl },
+    { rel: "stylesheet", href: styles },
+  ];
 };
 
 export const meta: MetaFunction = () => ({
@@ -44,6 +47,11 @@ export default function App() {
   return (
     <html lang="en" className="h-full">
       <head>
+        <script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "4e15da0efa3140c9be9e055e30014cc8"}'
+        ></script>
         <Meta />
         <Links />
       </head>

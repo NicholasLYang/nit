@@ -4,11 +4,13 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 export default function Index() {
   const { owner, name } = useParams();
-  const { readMe } = useOutletContext();
+  const { readMe, hasIssuesEnabled } = useOutletContext();
   const submit = useSubmit();
 
   useHotkeys("i", () => {
-    submit(null, { method: "get", action: `/${owner}/${name}/issues` });
+    if (hasIssuesEnabled) {
+      submit(null, { method: "get", action: `/${owner}/${name}/issues` });
+    }
   });
   useHotkeys("h", () => {
     submit(null, { method: "get", action: "/" });
@@ -26,14 +28,20 @@ export default function Index() {
         <Link to={"/"}>
           <KeyIcon>h</KeyIcon> Home
         </Link>
-        <Link to={`/${owner}/${name}/issues`}>
-          <KeyIcon>i</KeyIcon> Issues
-        </Link>
+        {hasIssuesEnabled && (
+          <Link to={`/${owner}/${name}/issues`}>
+            <KeyIcon>i</KeyIcon> Issues
+          </Link>
+        )}
         <Link to={`/${owner}/${name}/pulls`}>
           <KeyIcon>p</KeyIcon> Pull requests
         </Link>
       </div>
-      <pre className="w-2/3 whitespace-pre-wrap py-5">{readMe}</pre>
+      <div
+        className="prose w-2/3 pt-10"
+        dangerouslySetInnerHTML={{ __html: readMe }}
+      />
+      {/*<pre className="w-2/3 whitespace-pre-wrap py-5">{readMe}</pre>*/}
     </>
   );
 }

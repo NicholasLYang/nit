@@ -2,7 +2,7 @@ import { useOutletContext, useParams, useSubmit } from "@remix-run/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import ItemsList from "~/components/ItemsList";
 
-export default function Issues() {
+export default function IssuesIndex() {
   const { issues } = useOutletContext();
   const { owner, name } = useParams();
   const submit = useSubmit();
