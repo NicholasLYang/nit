@@ -121,10 +121,14 @@ export function useKeyPress(targetKey) {
   return keyPressed;
 }
 
-function capitalizeWord(str: string) {
-  return (str[0]?.toUpperCase() ?? "") + str.slice(1);
-}
+const repos = [
+  "facebook/react",
+  "rust-lang/rust",
+  "rails/rails",
+  "remix-run/remix",
+  "oven-sh/bun",
+];
 
-export function capitalize(str: string) {
-  return str.split(" ").map(capitalizeWord).join(" ");
+export function getRandomRepository() {
+  return repos[Math.floor(Math.random() * repos.length)];
 }

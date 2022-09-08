@@ -38,7 +38,9 @@ export default function App() {
   const submit = useSubmit();
 
   useHotkeys("g", () => {
-    window.location.href = `https://github.com${window.location.pathname}`;
+    if (window.location.pathname !== "/") {
+      window.location.href = `https://github.com${window.location.pathname}`;
+    }
   });
 
   useHotkeys("f", () => {

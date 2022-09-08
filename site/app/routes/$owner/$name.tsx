@@ -28,7 +28,11 @@ export async function loader({ params, request }: LoaderArgs) {
           defaultBranchRef {
             name
           }
-          issues(first: 20) {
+          issues(
+            states: [OPEN]
+            orderBy: { field: UPDATED_AT, direction: DESC }
+            first: 20
+          ) {
             nodes {
               id
               number
@@ -92,7 +96,6 @@ export default function Repository() {
   const { id, owner, name, issues, pullRequests, readMe, hasIssuesEnabled } =
     useLoaderData();
   const submit = useSubmit();
-  const location = useLocation();
 
   useHotkeys("command+i", () => {
     submit(null, { method: "get", action: "/" });
@@ -107,7 +110,7 @@ export default function Repository() {
   });
 
   useHotkeys("command+/", () => {
-    window.location.href = `https://github.com${location.pathname}`;
+    window.location.href = `https://github.com${window.location.pathname}`;
   });
 
   return (

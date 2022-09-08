@@ -48,18 +48,18 @@ export default function IssuePage() {
   });
 
   return (
-    <div className="w-2/3 max-w-xl grow">
+    <div className="w-2/3 max-w-4xl grow">
       <div>
         <span>
           <KeyIcon>h</KeyIcon> Go back
         </span>
       </div>
       <h1
-        className="py-5 text-3xl font-bold"
+        className="prose py-5 text-3xl font-bold"
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.titleHTML) }}
       />
       <div
-        className="w-full p-5"
+        className="prose w-full p-5"
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.bodyHTML) }}
       />
     </div>

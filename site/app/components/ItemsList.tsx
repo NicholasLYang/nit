@@ -87,7 +87,8 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
 
   useHotkeys(
     "space",
-    () => {
+    (event) => {
+      event.preventDefault();
       if (selectedItem === peekedItem) {
         setItemState((itemState) => ({
           ...itemState,
@@ -141,7 +142,7 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
           <li
             key={item.id}
             className={classNames(
-              "w-full max-w-2xl border-2 border-slate-800 p-2 shadow-block",
+              "w-full max-w-3xl border-2 border-slate-800 p-2 shadow-block",
               i === selectedItem && "border-blue-400"
             )}
             ref={getRef(i)}
