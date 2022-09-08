@@ -2,23 +2,16 @@ import client from "~/apollo-client";
 import gql from "graphql-tag";
 import { useLoaderData, useParams, useSubmit } from "@remix-run/react";
 import { LoaderArgs, redirect } from "@remix-run/node";
-import { getInstallationToken } from "~/auth.server";
+import { authenticator, getInstallationToken } from "~/auth.server";
 import sanitizeHtml from "sanitize-html";
 import { useHotkeys } from "react-hotkeys-hook";
 import KeyIcon from "~/components/KeyIcon";
 
 export async function loader({ params, request }: LoaderArgs) {
-  const result = await getInstallationToken(request, params);
+  const { accessToken } = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
 
-  if (result.logout) {
-    return result.logout;
-  }
-
-  if (result.error) {
-    return redirect("/", 401);
-  }
-
-  const { token } = result;
   const { data } = await client.query({
     query: gql`
       query Issue($owner: String!, $name: String!, $id: Int!) {
@@ -37,7 +30,7 @@ export async function loader({ params, request }: LoaderArgs) {
       name: params.name,
       id: parseInt(params.issueId),
     },
-    context: { headers: { Authorization: `token ${token}` } },
+    context: { headers: { Authorization: `token ${accessToken}` } },
   });
 
   return {

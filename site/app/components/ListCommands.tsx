@@ -1,11 +1,8 @@
 import KeyIcon from "~/components/KeyIcon";
 
-export function ListCommands({ backTo }: { backTo: string }) {
+export function ListCommands() {
   return (
     <div className="space-x-7 pb-5">
-      <span>
-        <KeyIcon>h</KeyIcon> Back to {backTo}
-      </span>
       <span>
         <KeyIcon>k</KeyIcon> Next item
       </span>

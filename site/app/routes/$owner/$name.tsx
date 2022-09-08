@@ -8,28 +8,21 @@ import {
 import { LoaderArgs, redirect } from "@remix-run/node";
 import { gql } from "@apollo/client";
 import client from "~/apollo-client";
-import { getInstallationToken } from "~/auth.server";
+import { authenticator, getInstallationToken } from "~/auth.server";
 import { Converter } from "showdown";
 import ActionButton from "~/components/ActionButton";
 import { useHotkeys } from "react-hotkeys-hook";
 
 export async function loader({ params, request }: LoaderArgs) {
-  const result = await getInstallationToken(request, params);
-
-  if (result.logout) {
-    return result.logout;
-  }
-  // TODO: Display this error somewhere
-  if (result.error) {
-    return redirect("/", 401);
-  }
-
-  const token = result.token;
+  const { accessToken } = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
 
   const { data } = await client.query({
     query: gql`
       query Repository($owner: String!, $name: String!) {
         repository(owner: $owner, name: $name) {
+          id
           name
           hasIssuesEnabled
           defaultBranchRef {
@@ -66,7 +59,7 @@ export async function loader({ params, request }: LoaderArgs) {
         }
       }
     `,
-    context: { headers: { Authorization: `token ${token}` } },
+    context: { headers: { Authorization: `bearer ${accessToken}` } },
     variables: { owner: params.owner, name: params.name },
   });
 
@@ -85,6 +78,7 @@ export async function loader({ params, request }: LoaderArgs) {
   }
 
   return {
+    id: data.repository.id,
     owner: params.owner,
     name: params.name,
     hasIssuesEnabled: data.repository.hasIssuesEnabled,
@@ -95,7 +89,7 @@ export async function loader({ params, request }: LoaderArgs) {
 }
 
 export default function Repository() {
-  const { owner, name, issues, pullRequests, readMe, hasIssuesEnabled } =
+  const { id, owner, name, issues, pullRequests, readMe, hasIssuesEnabled } =
     useLoaderData();
   const submit = useSubmit();
   const location = useLocation();
@@ -137,7 +131,15 @@ export default function Repository() {
           <span className="font-bold">{owner}</span> / {name}
         </h1>
       </div>
-      <Outlet context={{ issues, pullRequests, readMe, hasIssuesEnabled }} />
+      <Outlet
+        context={{
+          issues,
+          pullRequests,
+          readMe,
+          hasIssuesEnabled,
+          id,
+        }}
+      />
     </main>
   );
 }

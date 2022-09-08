@@ -1,21 +1,16 @@
 import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
 import { authenticator } from "~/auth.server";
-import { useEffect, useRef, useState } from "react";
-import { useLoaderData, useSubmit } from "@remix-run/react";
+import { useEffect, useRef } from "react";
+import { useSubmit } from "@remix-run/react";
 import client from "~/apollo-client";
 import { gql } from "@apollo/client";
-import ComboBox from "~/components/ComboBox";
 import { logout } from "~/session.server";
 import { useHotkeys } from "react-hotkeys-hook";
 import ActionButton from "~/components/ActionButton";
 
-/**
- * If there is just one installation, we show the top repositories for
- * that installation. Otherwise, we show the installations
- */
-enum HomeDataType {
-  Repositories,
-  Installations,
+export async function action({ request }: ActionArgs) {
+  const body = await request.formData();
+  return redirect(`/${body.get("repository")}`);
 }
 
 export async function loader({ request }: LoaderArgs) {
@@ -48,9 +43,9 @@ export async function loader({ request }: LoaderArgs) {
 
     const repositories = data.viewer.repositories.nodes;
     const randomIndex = Math.floor(Math.random() * repositories.length);
-
     return { repositories, randomIndex };
   } catch (e) {
+    console.error(e);
     if (e.networkError.statusCode) {
       return logout(request);
     }
@@ -59,22 +54,12 @@ export async function loader({ request }: LoaderArgs) {
   }
 }
 
-export async function action({ request }: ActionArgs) {
-  const params = await request.formData();
-  return redirect("/" + params.get("repoName"));
-}
-
 export default function Index() {
-  const [selectedItem, setSelectedItem] = useState<
-    { nameWithOwner: string } | undefined
-  >();
-
-  const { repositories, randomIndex } = useLoaderData();
   const ref = useRef(null);
   const submit = useSubmit();
 
   useHotkeys("command+b", () => {
-    submit(null, { method: "post", action: "/logout" });
+    submit(null, { method: "post", action: "/" });
   });
 
   useHotkeys("command+u", () => {
@@ -110,23 +95,22 @@ export default function Index() {
       </div>
       <div className="flex h-screen items-center justify-center">
         <div className="mb-20 flex flex-col items-center text-center">
-          <h1 className="text-2xl font-semibold">gitgot</h1>
-          <form
-            className="flex"
-            method="get"
-            action={`/${selectedItem?.nameWithOwner}`}
-          >
-            <ComboBox
-              innerRef={ref}
+          <h1 className="py-4 text-2xl font-semibold">gitgot</h1>
+          <form className="flex" method="post" action="/?index">
+            <label htmlFor="email" className="sr-only">
+              Email
+            </label>
+            <input
+              type="text"
+              ref={ref}
               tabIndex={100}
-              placeholder={repositories[randomIndex]?.name || "repository"}
-              items={repositories}
-              selectedItem={selectedItem}
-              setSelectedItem={setSelectedItem}
+              name="repository"
+              id="repository"
+              placeholder="facebook/react"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
             <button
               className="box m-2 disabled:bg-black disabled:text-white"
-              disabled={selectedItem === undefined}
               type="submit"
             >
               ENTER

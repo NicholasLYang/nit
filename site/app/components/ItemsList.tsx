@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Link, useParams, useSubmit } from "@remix-run/react";
-import { capitalize, classNames, isInViewport } from "~/utils";
+import { classNames, isInViewport } from "~/utils";
 import KeyIcon from "~/components/KeyIcon";
 import { ListCommands } from "~/components/ListCommands";
 import sanitizeHtml from "sanitize-html";
@@ -126,7 +126,7 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
 
   if (items.length === 0) {
     return (
-      <div className="flex items-center">
+      <div className="flex items-center py-10">
         <span className="pr-1">
           No {itemName} open, press <KeyIcon>h</KeyIcon> to go back
         </span>
@@ -134,9 +134,8 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
     );
   }
   return (
-    <div className="flex flex-col items-center pb-10">
-      <h1 className="pb-10 text-3xl font-bold">{capitalize(itemName)}</h1>
-      <ListCommands backTo="repo page" />
+    <div className="flex flex-col items-center py-10">
+      <ListCommands />
       <ul className="flex w-full flex-col items-center space-y-4">
         {items.map((item, i) => (
           <li

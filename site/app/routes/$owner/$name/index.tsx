@@ -38,10 +38,9 @@ export default function Index() {
         </Link>
       </div>
       <div
-        className="prose w-2/3 pt-10"
+        className="prose w-2/3 pt-10 prose-img:my-1"
         dangerouslySetInnerHTML={{ __html: readMe }}
       />
-      {/*<pre className="w-2/3 whitespace-pre-wrap py-5">{readMe}</pre>*/}
     </>
   );
 }
