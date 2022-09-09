@@ -1,14 +1,8 @@
-import {
-  Link,
-  Outlet,
-  useLoaderData,
-  useLocation,
-  useSubmit,
-} from "@remix-run/react";
+import { Outlet, useLoaderData, useSubmit } from "@remix-run/react";
 import { LoaderArgs, redirect } from "@remix-run/node";
 import { gql } from "@apollo/client";
 import client from "~/apollo-client";
-import { authenticator, getInstallationToken } from "~/auth.server";
+import { authenticator } from "~/auth.server";
 import { Converter } from "showdown";
 import ActionButton from "~/components/ActionButton";
 import { useHotkeys } from "react-hotkeys-hook";

@@ -1,15 +1,11 @@
 import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
 import { authenticator } from "~/auth.server";
 import { useEffect, useRef, useState } from "react";
-import { useLoaderData, useLocation, useSubmit } from "@remix-run/react";
-import client from "~/apollo-client";
-import { gql } from "@apollo/client";
-import { logout } from "~/session.server";
+import { useLoaderData, useSubmit } from "@remix-run/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import ActionButton from "~/components/ActionButton";
 import KeyIcon from "~/components/KeyIcon";
 import { getRandomRepository } from "~/utils";
-import { random } from "nanoid";
 
 export async function action({ request }: ActionArgs) {
   const body = await request.formData();
@@ -17,34 +13,14 @@ export async function action({ request }: ActionArgs) {
 }
 
 export async function loader({ request }: LoaderArgs) {
-  const { accessToken } = await authenticator.isAuthenticated(request, {
+  const { profile } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
 
-  try {
-    const { data } = await client.query({
-      query: gql`
-        query Viewer {
-          viewer {
-            login
-          }
-        }
-      `,
-      fetchPolicy: "no-cache",
-      context: { headers: { Authorization: `token ${accessToken}` } },
-    });
-
-    return {
-      login: data.viewer.login,
-      randomRepository: getRandomRepository(),
-    };
-  } catch (e) {
-    if (e.networkError.statusCode) {
-      return logout(request);
-    }
-
-    throw e;
-  }
+  return {
+    randomRepository: getRandomRepository(),
+    login: profile.displayName,
+  };
 }
 
 export default function Index() {

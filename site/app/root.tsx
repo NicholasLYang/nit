@@ -53,7 +53,7 @@ export default function App() {
           defer
           src="https://static.cloudflareinsights.com/beacon.min.js"
           data-cf-beacon='{"token": "4e15da0efa3140c9be9e055e30014cc8"}'
-        ></script>
+        />
         <Meta />
         <Links />
       </head>
