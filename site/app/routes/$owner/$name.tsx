@@ -62,16 +62,28 @@ export async function loader({ params, request }: LoaderArgs) {
   });
 
   const defaultBranch = data.repository.defaultBranchRef.name;
-  const readMeRequest = await fetch(
-    `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/README.md`
-  );
+  const [readMeRequest, contributingRequest] = await Promise.all([
+    fetch(
+      `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/README.md`
+    ),
+    fetch(
+      `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/CONTRIBUTING.md`
+    ),
+  ]);
+
+  const converter = new Converter();
+
+  let contributing;
+  if (contributingRequest.status !== 404) {
+    const contributingMarkdown = await contributingRequest.text();
+    contributing = converter.makeHtml(contributingMarkdown);
+  }
 
   let readMe;
   if (readMeRequest.status === 404) {
     readMe = "No README found";
   } else {
     const readMeMarkdown = await readMeRequest.text();
-    const converter = new Converter();
     readMe = converter.makeHtml(readMeMarkdown);
   }
 
@@ -83,12 +95,21 @@ export async function loader({ params, request }: LoaderArgs) {
     issues: data.repository.issues.nodes,
     pullRequests: data.repository.pullRequests.nodes,
     readMe,
+    contributing,
   };
 }
 
 export default function Repository() {
-  const { id, owner, name, issues, pullRequests, readMe, hasIssuesEnabled } =
-    useLoaderData();
+  const {
+    id,
+    owner,
+    name,
+    issues,
+    pullRequests,
+    readMe,
+    hasIssuesEnabled,
+    contributing,
+  } = useLoaderData();
   const submit = useSubmit();
 
   useHotkeys("command+i", () => {
@@ -135,6 +156,7 @@ export default function Repository() {
           readMe,
           hasIssuesEnabled,
           id,
+          contributing,
         }}
       />
     </main>

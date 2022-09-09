@@ -85,6 +85,9 @@ export default function OwnerPage() {
   useHotkeys("b", () => {
     submit(null, { method: "get", action: `/${login}?before=${startCursor}` });
   });
+  useHotkeys("h", () => {
+    submit(null, { method: "get", action: "/" });
+  });
 
   return (
     <div className="flex w-2/3 max-w-3xl flex-col items-center">
@@ -93,6 +96,9 @@ export default function OwnerPage() {
         <h2>{login}</h2>
       </div>
       <div className="space-x-5">
+        <span>
+          <KeyIcon>h</KeyIcon> Go home
+        </span>
         <span>
           <KeyIcon>n</KeyIcon> Next page
         </span>

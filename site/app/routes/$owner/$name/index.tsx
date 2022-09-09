@@ -4,7 +4,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 export default function Index() {
   const { owner, name } = useParams();
-  const { readMe, hasIssuesEnabled } = useOutletContext();
+  const { contributing, readMe, hasIssuesEnabled } = useOutletContext();
   const submit = useSubmit();
 
   useHotkeys("i", () => {
@@ -21,6 +21,11 @@ export default function Index() {
   useHotkeys("s", () => {
     submit(null, { method: "get", action: `/${owner}/${name}/search` });
   });
+  useHotkeys("c", () => {
+    if (contributing) {
+      submit(null, { method: "get", action: `/${owner}/${name}/contributing` });
+    }
+  });
 
   return (
     <>
@@ -36,6 +41,11 @@ export default function Index() {
         <Link to={`/${owner}/${name}/pulls`}>
           <KeyIcon>p</KeyIcon> Pull requests
         </Link>
+        {contributing && (
+          <Link to={`/${owner}/${name}/pulls`}>
+            <KeyIcon>c</KeyIcon> Contributing
+          </Link>
+        )}
       </div>
       <div
         className="prose w-2/3 pt-10 prose-img:my-1"
