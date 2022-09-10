@@ -4,10 +4,10 @@ export function ListCommands() {
   return (
     <div className="space-x-7 pb-5">
       <span>
-        <KeyIcon>k</KeyIcon> Next item
+        <KeyIcon>j</KeyIcon> Next item
       </span>
       <span>
-        <KeyIcon>j</KeyIcon> Previous item
+        <KeyIcon>k</KeyIcon> Previous item
       </span>
       <span>
         <KeyIcon>SPACE</KeyIcon> Preview content

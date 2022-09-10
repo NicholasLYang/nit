@@ -129,7 +129,7 @@ export default function Repository() {
   });
 
   return (
-    <main className="flex h-screen flex-col items-center">
+    <main className="flex flex-col items-center pb-10">
       <div className="flex flex-wrap space-x-7 self-start p-5">
         <ActionButton method="post" action="/logout">
           Go Home <span className="text-slate-400">&#8984;I</span>
@@ -144,7 +144,7 @@ export default function Repository() {
           Go To GitHub <span className="text-slate-400">&#8984;/</span>
         </ActionButton>
       </div>
-      <div className="flex items-center p-5 pb-16">
+      <div className="flex items-center p-5">
         <h1 className="pt-5">
           <span className="font-bold">{owner}</span> / {name}
         </h1>

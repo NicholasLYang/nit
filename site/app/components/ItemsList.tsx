@@ -24,7 +24,6 @@ interface ListProps {
 
 export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
   const submit = useSubmit();
-  const selectedRef = useRef(null);
   const { owner, name } = useParams();
   // We keep a hold of these two refs for when we need to scroll into view
   const nextSelectedRef = useRef(null);
@@ -38,9 +37,6 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
 
   const getRef = useCallback(
     (i: number) => {
-      if (i === selectedItem) {
-        return selectedRef;
-      }
       if (i === (selectedItem + 1) % items.length) {
         return nextSelectedRef;
       }
@@ -48,7 +44,7 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
         return previousSelectedRef;
       }
     },
-    [selectedRef, nextSelectedRef, previousSelectedRef, selectedItem]
+    [nextSelectedRef, previousSelectedRef, selectedItem]
   );
 
   useHotkeys(
@@ -59,28 +55,6 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
         method: "get",
         action: `/${owner}/${name}/${itemSlug}/${id}`,
       });
-    },
-    [items, selectedItem]
-  );
-
-  useHotkeys(
-    "k",
-    () => {
-      setItemState(({ peekedItem, selectedItem }) => ({
-        selectedItem: (selectedItem + 1) % items.length,
-        peekedItem,
-      }));
-
-      if (nextSelectedRef.current) {
-        nextSelectedRef.current.focus();
-
-        if (!isInViewport(nextSelectedRef.current)) {
-          nextSelectedRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      }
     },
     [items, selectedItem]
   );
@@ -106,6 +80,28 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
 
   useHotkeys(
     "j",
+    () => {
+      setItemState(({ peekedItem, selectedItem }) => ({
+        selectedItem: (selectedItem + 1) % items.length,
+        peekedItem,
+      }));
+
+      if (nextSelectedRef.current) {
+        nextSelectedRef.current.focus();
+
+        if (!isInViewport(nextSelectedRef.current)) {
+          nextSelectedRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }
+    },
+    [items, selectedItem]
+  );
+
+  useHotkeys(
+    "k",
     () => {
       setItemState(({ peekedItem, selectedItem }) => ({
         selectedItem: (selectedItem + items.length - 1) % items.length,
