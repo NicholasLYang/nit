@@ -1,3 +1,13 @@
 export interface Issue {
-  title: string;
+  id: string;
+  number: number;
+  titleHTML: string;
+  bodyHTML: string;
+}
+
+export interface PullRequest {
+  id: string;
+  number: number;
+  titleHTML: string;
+  bodyHTML: string;
 }

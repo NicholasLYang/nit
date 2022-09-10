@@ -26,8 +26,8 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
   const submit = useSubmit();
   const { owner, name } = useParams();
   // We keep a hold of these two refs for when we need to scroll into view
-  const nextSelectedRef = useRef(null);
-  const previousSelectedRef = useRef(null);
+  const nextSelectedRef = useRef<HTMLLIElement>(null);
+  const previousSelectedRef = useRef<HTMLLIElement>(null);
 
   const [{ selectedItem, peekedItem }, setItemState] = useState<ListState>({
     selectedItem: 0,

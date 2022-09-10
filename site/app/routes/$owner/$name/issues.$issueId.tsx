@@ -1,8 +1,8 @@
 import client from "~/apollo-client";
 import gql from "graphql-tag";
 import { useLoaderData, useParams, useSubmit } from "@remix-run/react";
-import { LoaderArgs, redirect } from "@remix-run/node";
-import { authenticator, getInstallationToken } from "~/auth.server";
+import { LoaderArgs } from "@remix-run/node";
+import { authenticator } from "~/auth.server";
 import sanitizeHtml from "sanitize-html";
 import { useHotkeys } from "react-hotkeys-hook";
 import KeyIcon from "~/components/KeyIcon";

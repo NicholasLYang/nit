@@ -4,6 +4,7 @@ import { authenticator } from "~/auth.server";
 import { useOutletContext } from "@remix-run/react";
 import client from "~/apollo-client";
 import { gql } from "@apollo/client";
+import { ContextType } from "~/routes/$owner/$name";
 
 export async function action({ request, params }: ActionArgs) {
   const formData = await request.formData();
@@ -11,7 +12,6 @@ export async function action({ request, params }: ActionArgs) {
   const body = formData.get("body");
   const repositoryId = formData.get("repositoryId");
 
-  console.log(repositoryId);
   const { accessToken } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
@@ -51,8 +51,8 @@ export async function action({ request, params }: ActionArgs) {
 }
 
 export default function NewIssue() {
-  const ref = useRef(null);
-  const context = useOutletContext();
+  const ref = useRef<HTMLInputElement | null>(null);
+  const context = useOutletContext<ContextType>();
   useEffect(() => {
     if (ref.current) {
       ref.current.focus();

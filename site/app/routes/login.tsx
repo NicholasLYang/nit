@@ -18,7 +18,14 @@ export default function LoginPage() {
   });
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center">
+    <div className="flex h-screen flex-col items-center justify-center text-center">
+      <div className="p-5">
+        <h1 className="text-2xl font-bold">Welcome to gitgot</h1>
+        <p className="max-w-sm">
+          gitgot is a dialed-in GitHub user interfaces. It lets you use GitHub
+          extremely quickly and efficiently.
+        </p>
+      </div>
       <Form method="post" action="/auth/github">
         <button>
           <KeyIcon>S</KeyIcon> Sign in

@@ -1,11 +1,21 @@
 import { Outlet, useLoaderData, useSubmit } from "@remix-run/react";
-import { LoaderArgs, redirect } from "@remix-run/node";
+import { LoaderArgs } from "@remix-run/node";
 import { gql } from "@apollo/client";
 import client from "~/apollo-client";
 import { authenticator } from "~/auth.server";
 import { Converter } from "showdown";
 import ActionButton from "~/components/ActionButton";
 import { useHotkeys } from "react-hotkeys-hook";
+import { Issue, PullRequest } from "~/types";
+
+export interface ContextType {
+  issues: Issue[];
+  pullRequests: PullRequest[];
+  readMe: string;
+  hasIssuesEnabled: boolean;
+  id: string;
+  contributing: string | undefined;
+}
 
 export async function loader({ params, request }: LoaderArgs) {
   const { accessToken } = await authenticator.isAuthenticated(request, {
@@ -128,6 +138,15 @@ export default function Repository() {
     window.location.href = `https://github.com${window.location.pathname}`;
   });
 
+  const context: ContextType = {
+    issues,
+    pullRequests,
+    readMe,
+    hasIssuesEnabled,
+    id,
+    contributing,
+  };
+
   return (
     <main className="flex flex-col items-center pb-10">
       <div className="flex flex-wrap space-x-7 self-start p-5">
@@ -149,16 +168,7 @@ export default function Repository() {
           <span className="font-bold">{owner}</span> / {name}
         </h1>
       </div>
-      <Outlet
-        context={{
-          issues,
-          pullRequests,
-          readMe,
-          hasIssuesEnabled,
-          id,
-          contributing,
-        }}
-      />
+      <Outlet context={context} />
     </main>
   );
 }

@@ -8,13 +8,9 @@ import KeyIcon from "~/components/KeyIcon";
 import sanitizeHtml from "sanitize-html";
 
 export async function loader({ params, request }: LoaderArgs) {
-  const { installations } = await authenticator.isAuthenticated(request, {
+  const { accessToken } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
-
-  const installation = installations.find(
-    (i) => i.account.login === params.owner
-  );
 
   const { data } = await client.query({
     query: gql`
@@ -32,7 +28,7 @@ export async function loader({ params, request }: LoaderArgs) {
         }
       }
     `,
-    context: { headers: { Authorization: `token ${installation.token}` } },
+    context: { headers: { Authorization: `token ${accessToken}` } },
     variables: {
       owner: params.owner,
       name: params.name,

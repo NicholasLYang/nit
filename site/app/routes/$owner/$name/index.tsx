@@ -1,10 +1,12 @@
 import { Link, useOutletContext, useParams, useSubmit } from "@remix-run/react";
 import KeyIcon from "~/components/KeyIcon";
 import { useHotkeys } from "react-hotkeys-hook";
+import { ContextType } from "~/routes/$owner/$name";
 
 export default function Index() {
   const { owner, name } = useParams();
-  const { contributing, readMe, hasIssuesEnabled } = useOutletContext();
+  const { contributing, readMe, hasIssuesEnabled } =
+    useOutletContext<ContextType>();
   const submit = useSubmit();
 
   useHotkeys("i", () => {

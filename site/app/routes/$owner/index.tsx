@@ -6,7 +6,6 @@ import { logout } from "~/session.server";
 import { Link, useLoaderData, useSubmit } from "@remix-run/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import KeyIcon from "~/components/KeyIcon";
-import ItemsList from "~/components/ItemsList";
 import { useCallback, useRef, useState } from "react";
 import { classNames, isInViewport } from "~/utils";
 

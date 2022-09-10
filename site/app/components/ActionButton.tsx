@@ -1,4 +1,12 @@
-export default function ActionButton({ method, action, children }) {
+import { ReactNode } from "react";
+
+interface Props {
+  method: string;
+  action: string;
+  children: ReactNode;
+}
+
+export default function ActionButton({ method, action, children }: Props) {
   return (
     <form className="ml-10" method={method} action={action}>
       <button

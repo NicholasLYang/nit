@@ -5,7 +5,9 @@ import { GitHubStrategy } from "remix-auth-github";
 
 interface User {
   accessToken: string;
-  profile: object;
+  profile: {
+    displayName: string;
+  };
 }
 
 export let authenticator = new Authenticator<User>(sessionStorage, {

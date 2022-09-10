@@ -2,9 +2,10 @@ import { useOutletContext, useParams, useSubmit } from "@remix-run/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import ItemsList from "~/components/ItemsList";
 import KeyIcon from "~/components/KeyIcon";
+import { ContextType } from "~/routes/$owner/$name";
 
 export default function PullRequests() {
-  const { pullRequests } = useOutletContext();
+  const { pullRequests } = useOutletContext<ContextType>();
   const params = useParams();
   const submit = useSubmit();
 

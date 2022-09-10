@@ -24,7 +24,7 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export default function Index() {
-  const ref = useRef(null);
+  const ref = useRef<HTMLInputElement>(null);
   const { login, randomRepository } = useLoaderData();
   const submit = useSubmit();
   const [showRepoInput, setShowRepoInput] = useState(false);
@@ -50,7 +50,7 @@ export default function Index() {
     if (ref.current) {
       ref.current.focus();
 
-      const onKeydown = (event) => {
+      const onKeydown = (event: KeyboardEvent) => {
         if (event.metaKey && event.key === "b") {
           submit(null, { method: "post", action: "/logout" });
         }

@@ -1,7 +1,8 @@
 import { authenticator } from "~/auth.server";
+import { LoaderArgs } from "@remix-run/node";
 
-export async function loader() {
-  const { installations } = await authenticator.isAuthenticated(request, {
+export async function loader({ request }: LoaderArgs) {
+  const { accessToken } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
 }
@@ -9,7 +10,9 @@ export async function loader() {
 export default function SearchPage() {
   return (
     <div>
-      <input />
+      <form>
+        <input type="text" />
+      </form>
     </div>
   );
 }

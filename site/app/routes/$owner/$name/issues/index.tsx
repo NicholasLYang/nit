@@ -2,9 +2,10 @@ import { useOutletContext, useParams, useSubmit } from "@remix-run/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import ItemsList from "~/components/ItemsList";
 import KeyIcon from "~/components/KeyIcon";
+import { ContextType } from "~/routes/$owner/$name";
 
 export default function IssuesIndex() {
-  const { issues } = useOutletContext();
+  const { issues } = useOutletContext<ContextType>();
   const { owner, name } = useParams();
   const submit = useSubmit();
 
