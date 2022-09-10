@@ -26,6 +26,12 @@ export default function Index() {
       submit(null, { method: "get", action: `/${owner}/${name}/contributing` });
     }
   });
+  useHotkeys("j", () => {
+    window.scrollBy({ top: window.innerHeight, left: 0, behavior: "smooth" });
+  });
+  useHotkeys("k", () => {
+    window.scrollBy({ top: -window.innerHeight, left: 0, behavior: "smooth" });
+  });
 
   return (
     <>
@@ -46,6 +52,14 @@ export default function Index() {
             <KeyIcon>c</KeyIcon> Contributing
           </Link>
         )}
+      </div>
+      <div className="space-x-5 pt-8">
+        <span>
+          <KeyIcon>j</KeyIcon> Scroll down
+        </span>
+        <span>
+          <KeyIcon>k</KeyIcon> Scroll up
+        </span>
       </div>
       <div
         className="prose w-2/3 pt-10 prose-img:my-1"

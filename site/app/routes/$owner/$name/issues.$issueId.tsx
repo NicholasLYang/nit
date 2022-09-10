@@ -21,6 +21,9 @@ export async function loader({ params, request }: LoaderArgs) {
             bodyHTML
             number
             titleHTML
+            author {
+              login
+            }
           }
         }
       }
@@ -46,18 +49,33 @@ export default function IssuePage() {
   useHotkeys("h", () => {
     submit(null, { method: "get", action: `/${owner}/${name}/issues` });
   });
+  useHotkeys("j", () => {
+    window.scrollBy({ top: window.innerHeight, left: 0, behavior: "smooth" });
+  });
+  useHotkeys("k", () => {
+    window.scrollBy({ top: -window.innerHeight, left: 0, behavior: "smooth" });
+  });
 
   return (
     <div className="w-2/3 max-w-4xl grow">
-      <div>
+      <div className="space-x-5">
         <span>
           <KeyIcon>h</KeyIcon> Go back
         </span>
+        <span>
+          <KeyIcon>j</KeyIcon> Scroll down
+        </span>
+        <span>
+          <KeyIcon>k</KeyIcon> Scroll up
+        </span>
       </div>
-      <h1
-        className="prose py-5 text-3xl font-bold"
-        dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.titleHTML) }}
-      />
+      <div className="pt-16">
+        <h1
+          className="prose text-3xl font-bold"
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.titleHTML) }}
+        />
+        <h2 className="text-lg">{issue.author.login}</h2>
+      </div>
       <div
         className="prose w-full p-5"
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.bodyHTML) }}

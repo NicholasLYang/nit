@@ -23,7 +23,7 @@ export default function IssuesIndex() {
   });
 
   return (
-    <div className="w-1/2 max-w-2xl">
+    <div className="w-2/3 max-w-4xl">
       <h1 className="py-5 text-3xl font-bold">Issues</h1>
       <div className="space-x-5 py-2">
         <span>
