@@ -24,6 +24,11 @@ export async function loader({ params, request }: LoaderArgs) {
             author {
               login
             }
+            timelineItems(first: 30) {
+              nodes {
+                __typename
+              }
+            }
           }
         }
       }
@@ -80,6 +85,11 @@ export default function IssuePage() {
         className="prose w-full p-5"
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.bodyHTML) }}
       />
+      <ul>
+        {issue.timelineItems.nodes.map((item) => (
+          <li>{item.__typename}</li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -37,15 +37,22 @@ export async function loader({ request }: LoaderArgs) {
 export default function App() {
   const submit = useSubmit();
 
-  useHotkeys("g", () => {
-    if (window.location.pathname !== "/") {
-      window.location.href = `https://github.com${window.location.pathname}`;
-    }
+  useHotkeys("command+/", () => {
+    window.location.href = `https://github.com${window.location.pathname}`;
   });
-
-  useHotkeys("f", () => {
+  useHotkeys("command+i", (event) => {
+    event.preventDefault();
+    submit(null, { method: "get", action: "/" });
+  });
+  useHotkeys("command+b", (event) => {
+    event.preventDefault();
+    submit(null, { method: "post", action: "/logout" });
+  });
+  useHotkeys("command+u", (event) => {
+    event.preventDefault();
     submit(null, { method: "get", action: "/feedback" });
   });
+
   return (
     <html lang="en" className="h-full">
       <head>

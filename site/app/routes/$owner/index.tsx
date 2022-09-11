@@ -167,10 +167,10 @@ export default function OwnerPage() {
           <KeyIcon>h</KeyIcon> Go home
         </span>
         <span>
-          <KeyIcon>n</KeyIcon> Next page
+          <KeyIcon>n</KeyIcon> Next page of repositories
         </span>
         <span>
-          <KeyIcon>b</KeyIcon> Previous page
+          <KeyIcon>b</KeyIcon> Previous page of repositories
         </span>
       </div>
       <h2 className="pb-5 pt-10 text-xl font-semibold">Repositories</h2>

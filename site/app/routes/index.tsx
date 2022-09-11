@@ -29,14 +29,6 @@ export default function Index() {
   const submit = useSubmit();
   const [showRepoInput, setShowRepoInput] = useState(false);
 
-  useHotkeys("command+b", () => {
-    submit(null, { method: "post", action: "/logout" });
-  });
-
-  useHotkeys("command+u", () => {
-    submit(null, { method: "get", action: "/feedback" });
-  });
-
   useHotkeys("m", () => {
     submit(null, { method: "get", action: `/${login}` });
   });

@@ -5,7 +5,6 @@ import client from "~/apollo-client";
 import { authenticator } from "~/auth.server";
 import { Converter } from "showdown";
 import ActionButton from "~/components/ActionButton";
-import { useHotkeys } from "react-hotkeys-hook";
 import { Issue, PullRequest } from "~/types";
 
 export interface ContextType {
@@ -120,23 +119,6 @@ export default function Repository() {
     hasIssuesEnabled,
     contributing,
   } = useLoaderData();
-  const submit = useSubmit();
-
-  useHotkeys("command+i", () => {
-    submit(null, { method: "get", action: "/" });
-  });
-
-  useHotkeys("command+b", () => {
-    submit(null, { method: "post", action: "/logout" });
-  });
-
-  useHotkeys("command+u", () => {
-    submit(null, { method: "post", action: "/feedback" });
-  });
-
-  useHotkeys("command+/", () => {
-    window.location.href = `https://github.com${window.location.pathname}`;
-  });
 
   const context: ContextType = {
     issues,
