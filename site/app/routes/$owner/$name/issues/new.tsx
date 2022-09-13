@@ -1,10 +1,11 @@
 import { ActionArgs, redirect } from "@remix-run/node";
 import { useEffect, useRef } from "react";
 import { authenticator } from "~/auth.server";
-import { useOutletContext } from "@remix-run/react";
+import { useOutletContext, useSubmit } from "@remix-run/react";
 import client from "~/apollo-client";
 import { gql } from "@apollo/client";
 import { ContextType } from "~/routes/$owner/$name";
+import KeyIcon from "~/components/KeyIcon";
 
 export async function action({ request, params }: ActionArgs) {
   const formData = await request.formData();
@@ -64,7 +65,15 @@ export default function NewIssue() {
       <h1 className="text-2xl font-semibold">New Issue</h1>
       <form className="flex flex-col space-y-6 p-4" method="post">
         <input name="title" type="text" placeholder="Title" ref={ref} />
-        <textarea name="body" placeholder="Your description here" />
+        <textarea
+          onKeyDown={(e) => {
+            if (e.key === "enter" && e.metaKey) {
+            }
+          }}
+          name="body"
+          placeholder="Your description here"
+          rows={8}
+        />
         <input
           name="repositoryId"
           type="text"
@@ -72,7 +81,7 @@ export default function NewIssue() {
           readOnly
           value={context.id}
         />
-        <button className="box w-16" type="submit">
+        <button className="box w-40 py-3" type="submit">
           Submit
         </button>
       </form>

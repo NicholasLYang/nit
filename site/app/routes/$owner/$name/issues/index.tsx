@@ -34,7 +34,7 @@ export default function IssuesIndex() {
           <KeyIcon>n</KeyIcon> New issue
         </span>
       </div>
-      <ItemsList items={issues} itemName="issues" itemSlug="issues" />;
+      <ItemsList items={issues} itemName="issues" itemSlug="issues" />
     </div>
   );
 }

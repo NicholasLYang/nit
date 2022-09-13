@@ -1,4 +1,9 @@
-import { Outlet, useLoaderData, useSubmit } from "@remix-run/react";
+import {
+  Outlet,
+  useLoaderData,
+  useLocation,
+  useSubmit,
+} from "@remix-run/react";
 import { LoaderArgs } from "@remix-run/node";
 import { gql } from "@apollo/client";
 import client from "~/apollo-client";
@@ -122,6 +127,7 @@ export default function Repository() {
     hasIssuesEnabled,
     contributing,
   } = useLoaderData();
+  const location = useLocation();
 
   const context: ContextType = {
     issues,
@@ -144,7 +150,7 @@ export default function Repository() {
         <ActionButton method="get" action="/feedback">
           Feedback <span className="text-slate-400">&#8984;U</span>
         </ActionButton>
-        <ActionButton method="post" action="/logout">
+        <ActionButton href={`https://github.com/${location.pathname}`}>
           Go To GitHub <span className="text-slate-400">&#8984;/</span>
         </ActionButton>
       </div>

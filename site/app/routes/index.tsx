@@ -65,7 +65,7 @@ export default function Index() {
 
   return (
     <main>
-      <div className="flex">
+      <div className="flex space-x-5 pt-5 pl-5">
         <ActionButton method="post" action="/logout">
           Log out <span className="text-slate-400">&#8984;B</span>
         </ActionButton>

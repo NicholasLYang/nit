@@ -1,4 +1,4 @@
-import { Form, useSubmit } from "@remix-run/react";
+import { Form, Link, useSubmit } from "@remix-run/react";
 import * as React from "react";
 import { authenticator } from "~/auth.server";
 import { LoaderArgs } from "@remix-run/node";
@@ -18,12 +18,19 @@ export default function LoginPage() {
   });
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center text-center">
-      <div className="p-5">
-        <h1 className="text-2xl font-bold">Welcome to gitgot</h1>
-        <p className="max-w-sm">
+    <div className="flex flex-col items-center justify-center">
+      <div className="max-w-sm py-10">
+        <h1 className="py-3 text-2xl font-bold">Welcome to gitgot</h1>
+        <p>
           gitgot is a dialed-in GitHub user interfaces. It lets you use GitHub
           extremely quickly and efficiently.
+        </p>
+        <p className="py-5">
+          If you're new to gitgot,{" "}
+          <Link className="text-blue-600 visited:text-purple-600" to="/help">
+            click here
+          </Link>{" "}
+          for a tutorial
         </p>
       </div>
       <Form method="post" action="/auth/github">

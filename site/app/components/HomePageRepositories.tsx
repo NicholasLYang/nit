@@ -24,17 +24,22 @@ export default function HomePageRepositories({ repositories }: Props) {
     <div>
       {repositories.pinned.length > 0 && (
         <div className="p-5">
-          <h2 className="text-lg">Pinned</h2>
-          <ul>
-            {repositories.pinned.map((repo) => (
-              <li className="box">{repo}</li>
+          <h2 className="text-left text-lg font-semibold">Pinned</h2>
+          <ul className="space-x-5">
+            {repositories.pinned.map((repo, index) => (
+              <li className="box">
+                <Link className="flex items-center p-3" to={`/${repo}`}>
+                  <KeyIcon>{index}</KeyIcon>
+                  <span className="px-2 text-lg">{repo}</span>
+                </Link>
+              </li>
             ))}
           </ul>
         </div>
       )}
       {repositories.recentlyVisited.length > 0 && (
         <div className="p-5">
-          <h2 className="text-lg">Recently Visited</h2>
+          <h2 className="text-left text-lg font-semibold">Recently Visited</h2>
           <ul className="space-x-5">
             {repositories.recentlyVisited.map((repo, index) => (
               <li className="box">

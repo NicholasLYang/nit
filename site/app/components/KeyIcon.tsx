@@ -6,5 +6,5 @@ interface Props {
 }
 
 export default function KeyIcon({ children, className }: Props) {
-  return <kbd className={`box ${className}`}>{children}</kbd>;
+  return <kbd className={`key-icon ${className}`}>{children}</kbd>;
 }

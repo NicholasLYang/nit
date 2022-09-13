@@ -160,7 +160,7 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
                     </div>
                   ) : (
                     <div
-                      className="mt-5 max-h-96 truncate bg-slate-100 p-6"
+                      className="mt-5 max-h-96 whitespace-normal bg-slate-100 p-6"
                       dangerouslySetInnerHTML={{
                         __html: sanitizeHtml(item.bodyHTML),
                       }}
