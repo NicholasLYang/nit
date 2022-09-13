@@ -2,11 +2,17 @@ import { Authenticator } from "remix-auth";
 import { sessionStorage } from "~/session.server";
 import { expect } from "~/utils";
 import { GitHubStrategy } from "remix-auth-github";
+import { findOrCreateUser } from "~/models/user.server";
 
 interface User {
+  id: string;
   accessToken: string;
   profile: {
     displayName: string;
+    _json: {
+      id: number;
+      email: string;
+    };
   };
 }
 
@@ -32,7 +38,18 @@ authenticator.use(
       scope: "repo",
     },
     async ({ accessToken, profile }) => {
-      return { accessToken, profile };
+      try {
+        const user = await findOrCreateUser(
+          profile._json.id,
+          profile._json.email,
+          profile.displayName
+        );
+
+        return { accessToken, profile, id: user.id };
+      } catch (e) {
+        console.error(e);
+        throw e;
+      }
     }
   ),
   "github"

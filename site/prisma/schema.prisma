@@ -9,7 +9,12 @@ generator client {
 
 model User {
   id    String @id @default(cuid())
-  email String @unique
+  email String
+  githubLogin String
+  githubId Int @unique
+
+  pinnedRepositories String @default("")
+  recentlyVisitedRepositories String @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

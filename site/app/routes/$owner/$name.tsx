@@ -6,6 +6,7 @@ import { authenticator } from "~/auth.server";
 import { Converter } from "showdown";
 import ActionButton from "~/components/ActionButton";
 import { Issue, PullRequest } from "~/types";
+import { addVisitedRepository } from "~/models/user.server";
 
 export interface ContextType {
   issues: Issue[];
@@ -17,9 +18,11 @@ export interface ContextType {
 }
 
 export async function loader({ params, request }: LoaderArgs) {
-  const { accessToken } = await authenticator.isAuthenticated(request, {
+  const { id, accessToken } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
+
+  await addVisitedRepository(id, `${params.owner}/${params.name}`);
 
   const { data } = await client.query({
     query: gql`
