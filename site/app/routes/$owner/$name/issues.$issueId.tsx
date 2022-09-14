@@ -1,11 +1,12 @@
 import client from "~/apollo-client";
 import gql from "graphql-tag";
-import { useLoaderData, useParams, useSubmit } from "@remix-run/react";
+import { Link, useLoaderData, useParams, useSubmit } from "@remix-run/react";
 import { LoaderArgs } from "@remix-run/node";
 import { authenticator } from "~/auth.server";
 import sanitizeHtml from "sanitize-html";
 import { useHotkeys } from "react-hotkeys-hook";
 import KeyIcon from "~/components/KeyIcon";
+import TimelineItem from "~/components/TimelineItem";
 
 export async function loader({ params, request }: LoaderArgs) {
   const { accessToken } = await authenticator.isAuthenticated(request, {
@@ -27,6 +28,91 @@ export async function loader({ params, request }: LoaderArgs) {
             timelineItems(first: 30) {
               nodes {
                 __typename
+                ... on AddedToProjectEvent {
+                  actor {
+                    login
+                  }
+                  createdAt
+                }
+                ... on AssignedEvent {
+                  actor {
+                    login
+                  }
+                  assignee {
+                    ... on Bot {
+                      login
+                    }
+                    ... on Mannequin {
+                      login
+                    }
+                    ... on User {
+                      login
+                    }
+                    ... on Organization {
+                      login
+                    }
+                  }
+                  assignable {
+                    __typename
+                    ... on Issue {
+                      number
+                    }
+                    ... on PullRequest {
+                      number
+                    }
+                  }
+                }
+                ... on ClosedEvent {
+                  actor {
+                    login
+                  }
+                  stateReason
+                }
+                ... on CommentDeletedEvent {
+                  actor {
+                    login
+                  }
+                }
+                ... on ConnectedEvent {
+                  actor {
+                    login
+                  }
+                }
+                ... on ConvertedNoteToIssueEvent {
+                  actor {
+                    login
+                  }
+                }
+                ... on CrossReferencedEvent {
+                  actor {
+                    login
+                  }
+                }
+                ... on DemilestonedEvent {
+                  actor {
+                    login
+                  }
+                }
+                ... on DisconnectedEvent {
+                  actor {
+                    login
+                  }
+                }
+                ... on IssueComment {
+                  author {
+                    login
+                  }
+                  bodyHTML
+                }
+                ... on LabeledEvent {
+                  actor {
+                    login
+                  }
+                  label {
+                    color
+                    name
+                  }
+                }
               }
             }
           }
@@ -62,7 +148,7 @@ export default function IssuePage() {
   });
 
   return (
-    <div className="w-2/3 max-w-4xl grow">
+    <div className="flex w-3/4 max-w-5xl grow flex-col items-center">
       <div className="space-x-5">
         <span>
           <KeyIcon>h</KeyIcon> Go back
@@ -74,20 +160,22 @@ export default function IssuePage() {
           <KeyIcon>k</KeyIcon> Scroll up
         </span>
       </div>
-      <div className="pt-16">
+      <div className="pt-16 pb-8">
         <h1
           className="prose text-3xl font-bold"
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.titleHTML) }}
         />
-        <h2 className="text-lg">{issue.author.login}</h2>
+        <h2 className="text-lg">
+          <Link to={`/${issue.author.login}`}>{issue.author.login}</Link>
+        </h2>
       </div>
       <div
-        className="prose w-full p-5"
+        className="box prose w-full whitespace-normal p-5 font-normal"
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.bodyHTML) }}
       />
-      <ul>
+      <ul className="space-y-5 p-5">
         {issue.timelineItems.nodes.map((item) => (
-          <li>{item.__typename}</li>
+          <TimelineItem type={item.__typename} payload={item} />
         ))}
       </ul>
     </div>

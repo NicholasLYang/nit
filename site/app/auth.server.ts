@@ -35,7 +35,7 @@ authenticator.use(
         process.env.CALLBACK_URL,
         "Expected CALLBACK_URL environment variable"
       ),
-      scope: "repo",
+      scope: "repo,read:org",
     },
     async ({ accessToken, profile }) => {
       try {

@@ -39,7 +39,7 @@ export default function HomePageRepositories({
       {recentlyVisited.length > 0 && (
         <div className="p-5">
           <h2 className="text-left text-lg font-semibold">Recently Visited</h2>
-          <ul className="flex flex-wrap gap-2">
+          <ul className="flex flex-col gap-2">
             {recentlyVisited.map((repo, index) => (
               <li className="box w-96">
                 <Link className="flex items-center p-3" to={`/${repo}`}>
