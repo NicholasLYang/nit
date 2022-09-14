@@ -8,9 +8,21 @@ interface Props {
 
 export default function TimelineItem({ type, payload }: Props) {
   switch (type) {
+    case "CrossReferencedEvent":
+      return (
+        <li>
+          <span>{payload.actor.login} mentioned this issue</span>
+          <h3
+            className="text-lg font-semibold"
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(payload.source.titleHTML),
+            }}
+          />
+        </li>
+      );
     case "IssueComment":
       return (
-        <li className="box">
+        <li className="box p-4 py-5">
           <h3 className="py-2 font-semibold">{payload.author.login}</h3>
           <div
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(payload.bodyHTML) }}
@@ -31,6 +43,7 @@ export default function TimelineItem({ type, payload }: Props) {
       );
     default:
       console.error(`Not implemented yet: ${type}`);
+      console.error(payload);
       return (
         <li>
           <div>{type}</div>

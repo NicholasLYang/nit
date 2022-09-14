@@ -87,6 +87,17 @@ export async function loader({ params, request }: LoaderArgs) {
                   actor {
                     login
                   }
+                  source {
+                    __typename
+                    ... on Issue {
+                      titleHTML
+                      number
+                    }
+                    ... on PullRequest {
+                      titleHTML
+                      number
+                    }
+                  }
                 }
                 ... on DemilestonedEvent {
                   actor {
@@ -174,10 +185,20 @@ export default function IssuePage() {
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.bodyHTML) }}
       />
       <ul className="space-y-5 p-5">
-        {issue.timelineItems.nodes.map((item) => (
+        {issue.timelineItems.nodes.filter(isDisplayedEvent).map((item) => (
           <TimelineItem type={item.__typename} payload={item} />
         ))}
       </ul>
     </div>
   );
+}
+
+function isDisplayedEvent(event: { __typename: string }): boolean {
+  switch (event.__typename) {
+    case "MentionedEvent":
+    case "SubscribedEvent":
+      return false;
+    default:
+      return true;
+  }
 }
