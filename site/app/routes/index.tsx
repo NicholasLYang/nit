@@ -6,8 +6,10 @@ import { useHotkeys } from "react-hotkeys-hook";
 import ActionButton from "~/components/ActionButton";
 import KeyIcon from "~/components/KeyIcon";
 import { getRandomRepository } from "~/utils";
-import { getHomePageRepositories } from "~/models/user.server";
+import { getRecentlyVisitedRepositories } from "~/models/user.server";
 import HomePageRepositories from "~/components/HomePageRepositories";
+import client from "~/apollo-client";
+import { gql } from "@apollo/client";
 
 export async function action({ request }: ActionArgs) {
   const body = await request.formData();
@@ -15,22 +17,50 @@ export async function action({ request }: ActionArgs) {
 }
 
 export async function loader({ request }: LoaderArgs) {
-  const { id, profile } = await authenticator.isAuthenticated(request, {
-    failureRedirect: "/login",
+  const { id, accessToken, profile } = await authenticator.isAuthenticated(
+    request,
+    {
+      failureRedirect: "/login",
+    }
+  );
+
+  const { data } = await client.query({
+    query: gql`
+      query PinnedRepositories {
+        viewer {
+          pinnedItems(first: 6) {
+            nodes {
+              ... on Repository {
+                nameWithOwner
+              }
+            }
+          }
+        }
+      }
+    `,
+    context: { headers: { Authorization: `bearer ${accessToken}` } },
   });
 
-  const repositories = await getHomePageRepositories(id);
+  const recentlyVisitedRepositories = await getRecentlyVisitedRepositories(id);
 
   return {
     randomRepository: getRandomRepository(),
     login: profile.displayName,
-    repositories,
+    recentlyVisitedRepositories,
+    pinnedRepositories: data.viewer.pinnedItems.nodes.map(
+      ({ nameWithOwner }) => nameWithOwner
+    ),
   };
 }
 
 export default function Index() {
   const ref = useRef<HTMLInputElement>(null);
-  const { login, randomRepository, repositories } = useLoaderData();
+  const {
+    login,
+    randomRepository,
+    recentlyVisitedRepositories,
+    pinnedRepositories,
+  } = useLoaderData();
   const submit = useSubmit();
   const [showRepoInput, setShowRepoInput] = useState(false);
 
@@ -76,7 +106,6 @@ export default function Index() {
       <div className="flex h-screen items-center justify-center">
         <div className="mb-20 flex flex-col items-center text-center">
           <h1 className="py-4 text-2xl font-semibold">gitgot</h1>
-          {repositories && <HomePageRepositories repositories={repositories} />}
           {showRepoInput ? (
             <div>
               <div className="flex flex-col items-start pb-5">
@@ -115,6 +144,10 @@ export default function Index() {
               </span>
             </div>
           )}
+          <HomePageRepositories
+            recentlyVisited={recentlyVisitedRepositories}
+            pinned={pinnedRepositories}
+          />
         </div>
       </div>
     </main>

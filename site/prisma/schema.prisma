@@ -13,7 +13,6 @@ model User {
   githubLogin String
   githubId Int @unique
 
-  pinnedRepositories String @default("")
   recentlyVisitedRepositories String @default("")
 
   createdAt DateTime @default(now())

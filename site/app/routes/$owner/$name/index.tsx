@@ -64,7 +64,7 @@ export default function Index() {
         </span>
       </div>
       <div
-        className="prose w-2/3 pt-10 prose-img:my-1"
+        className="prose mt-10 bg-slate-200 py-10 px-20 prose-img:my-1"
         dangerouslySetInnerHTML={{ __html: readMe }}
       />
     </>

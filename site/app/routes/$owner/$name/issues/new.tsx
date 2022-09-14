@@ -1,11 +1,18 @@
 import { ActionArgs, redirect } from "@remix-run/node";
 import { useEffect, useRef } from "react";
 import { authenticator } from "~/auth.server";
-import { useOutletContext, useSubmit } from "@remix-run/react";
+import {
+  SubmitFunction,
+  useOutletContext,
+  useParams,
+  useSubmit,
+} from "@remix-run/react";
 import client from "~/apollo-client";
 import { gql } from "@apollo/client";
 import { ContextType } from "~/routes/$owner/$name";
 import KeyIcon from "~/components/KeyIcon";
+import { addGlobalKeyCommands } from "~/key-commands";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export async function action({ request, params }: ActionArgs) {
   const formData = await request.formData();
@@ -51,18 +58,65 @@ export async function action({ request, params }: ActionArgs) {
   );
 }
 
+function addGoBackKeyCommand(
+  element: HTMLElement,
+  submit: SubmitFunction,
+  owner: string,
+  name: string
+) {
+  element.addEventListener("keydown", (event) => {
+    if (event.metaKey && event.key === "h") {
+      event.preventDefault();
+      submit(null, {
+        method: "get",
+        action: `/${owner}/${name}/issues`,
+      });
+    }
+  });
+}
+
 export default function NewIssue() {
   const ref = useRef<HTMLInputElement | null>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const context = useOutletContext<ContextType>();
+  const submit = useSubmit();
+  const params = useParams();
+
   useEffect(() => {
     if (ref.current) {
       ref.current.focus();
+      addGlobalKeyCommands(ref.current, submit);
+      addGoBackKeyCommand(ref.current, submit, params.owner!, params.name!);
     }
   }, [ref]);
+
+  useEffect(() => {
+    if (textAreaRef.current) {
+      addGlobalKeyCommands(textAreaRef.current, submit);
+      addGoBackKeyCommand(
+        textAreaRef.current,
+        submit,
+        params.owner!,
+        params.name!
+      );
+    }
+  }, [textAreaRef]);
+
+  useHotkeys("Command+h", (e) => {
+    e.preventDefault();
+    submit(null, {
+      method: "get",
+      action: `/${params.owner}/${params.name}/issues`,
+    });
+  });
 
   return (
     <div className="w-1/2 max-w-3xl">
       <h1 className="text-2xl font-semibold">New Issue</h1>
+      <div className="py-2">
+        <KeyIcon>&#8984;H</KeyIcon>
+        <span className="px-1">Go back</span>
+      </div>
       <form className="flex flex-col space-y-6 p-4" method="post">
         <input name="title" type="text" placeholder="Title" ref={ref} />
         <textarea
@@ -73,6 +127,7 @@ export default function NewIssue() {
           name="body"
           placeholder="Your description here"
           rows={8}
+          ref={textAreaRef}
         />
         <input
           name="repositoryId"

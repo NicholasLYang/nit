@@ -1,7 +1,6 @@
 import type { User } from "@prisma/client";
 
 import { prisma } from "~/db.server";
-import { getUser } from "~/session.server";
 import { HomePageRepositories } from "~/types";
 
 export type { User } from "@prisma/client";
@@ -12,14 +11,6 @@ export async function getUserById(id: User["id"]) {
 
 export async function getUserByEmail(email: User["email"]) {
   return prisma.user.findUnique({ where: { email } });
-}
-
-export async function createUser(email: User["email"]) {
-  return prisma.user.create({
-    data: {
-      email,
-    },
-  });
 }
 
 export async function findOrCreateUser(
@@ -34,32 +25,16 @@ export async function findOrCreateUser(
   });
 }
 
-export async function getHomePageRepositories(
+export async function getRecentlyVisitedRepositories(
   id: User["id"]
-): Promise<HomePageRepositories | undefined> {
+): Promise<string[]> {
   const user = await getUserById(id);
-  if (!user) {
-    return undefined;
-  }
-  if (
-    user.recentlyVisitedRepositories === "" &&
-    user.pinnedRepositories === ""
-  ) {
-    return undefined;
+
+  if (!user || user.recentlyVisitedRepositories === "") {
+    return [];
   }
 
-  const recentlyVisitedRepositories =
-    user.recentlyVisitedRepositories !== ""
-      ? user.recentlyVisitedRepositories.split(" ")
-      : [];
-
-  const pinnedRepositories =
-    user.pinnedRepositories !== "" ? user.pinnedRepositories.split(" ") : [];
-
-  return {
-    recentlyVisited: recentlyVisitedRepositories,
-    pinned: pinnedRepositories,
-  };
+  return user.recentlyVisitedRepositories.split(" ");
 }
 
 export async function addVisitedRepository(id: User["id"], repoName: string) {

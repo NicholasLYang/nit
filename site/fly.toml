@@ -7,6 +7,7 @@ processes = []
 
 [env]
   CALLBACK_URL = "https://gitgot.io/auth/github/callback"
+  DATABASE_URL = "file:/data/data/database.db"
 
 [experimental]
   allowed_public_ports = []
