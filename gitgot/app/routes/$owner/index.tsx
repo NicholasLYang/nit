@@ -99,13 +99,24 @@ export default function OwnerPage() {
     },
     [nextSelectedRef, previousSelectedRef, selectedRepository]
   );
+  useHotkeys(
+    "n",
+    () => {
+      submit(null, { method: "get", action: `/${login}?after=${endCursor}` });
+    },
+    [endCursor]
+  );
+  useHotkeys(
+    "b",
+    () => {
+      submit(null, {
+        method: "get",
+        action: `/${login}?before=${startCursor}`,
+      });
+    },
+    [startCursor]
+  );
 
-  useHotkeys("n", () => {
-    submit(null, { method: "get", action: `/${login}?after=${endCursor}` });
-  });
-  useHotkeys("b", () => {
-    submit(null, { method: "get", action: `/${login}?before=${startCursor}` });
-  });
   useHotkeys("h", () => {
     submit(null, { method: "get", action: "/" });
   });
@@ -185,11 +196,11 @@ export default function OwnerPage() {
           <KeyIcon>ENTER</KeyIcon> Select repository
         </span>
       </div>
-      <ul className="flex flex-col space-y-5 p-4">
+      <ul className="flex w-96 flex-col space-y-5 p-4">
         {repositories.map((repo, i) => (
           <li
             className={classNames(
-              "border-2 border-slate-800 p-2 shadow-block",
+              "whitespace-normal border-2 border-slate-800 p-2 shadow-block",
               selectedRepository === i && "border-blue-400"
             )}
             key={repo.nameWithOwner}
