@@ -91,7 +91,7 @@ export default function Index() {
           Feedback <span className="text-slate-400">&#8984;U</span>
         </ActionButton>
       </div>
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex items-center justify-center">
         <div className="mb-20 flex flex-col items-center text-center">
           <h1 className="py-4 text-2xl font-semibold">gitgot</h1>
           {searchParams.get("state") === "goto" ? (

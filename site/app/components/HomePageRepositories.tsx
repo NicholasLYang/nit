@@ -35,7 +35,7 @@ export default function HomePageRepositories({
   });
 
   return (
-    <div className="flex w-3/4">
+    <div className="flex flex-wrap">
       {recentlyVisited.length > 0 && (
         <div className="p-5">
           <h2 className="text-left text-lg font-semibold">Recently Visited</h2>
