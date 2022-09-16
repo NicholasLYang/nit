@@ -8,6 +8,24 @@ interface Props {
 
 export default function TimelineItem({ type, payload }: Props) {
   switch (type) {
+    case "AssignedEvent":
+      return (
+        <li>
+          {payload.actor?.login ?? "ghost"} assigned {payload.assignee.login}
+        </li>
+      );
+    case "ClosedEvent":
+      let reason: string = {
+        COMPLETED: "completed",
+        NOT_PLANNED: "not planned",
+        REOPENED: "reopened",
+      }[payload.stateReason];
+
+      return (
+        <li>
+          {payload.actor?.login ?? "ghost"} closed this as {reason}
+        </li>
+      );
     case "CrossReferencedEvent":
       return (
         <li>
