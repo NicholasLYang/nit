@@ -8,7 +8,6 @@ import { useHotkeys } from "react-hotkeys-hook";
 import ItemsList from "~/components/ItemsList";
 import KeyIcon from "~/components/KeyIcon";
 import { ContextType } from "~/routes/$owner/$name";
-import { useEffect, useRef, useState } from "react";
 import { ActionArgs } from "@remix-run/server-runtime";
 import { redirect } from "@remix-run/node";
 import { GoToIssueForm } from "~/components/GoToIssueForm";
