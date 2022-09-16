@@ -11,7 +11,7 @@ export default function TimelineItem({ type, payload }: Props) {
     case "CrossReferencedEvent":
       return (
         <li>
-          <span>{payload.actor.login} mentioned this issue</span>
+          <span>{payload.actor?.login ?? "ghost"} mentioned this issue</span>
           <h3
             className="text-lg font-semibold"
             dangerouslySetInnerHTML={{
@@ -22,9 +22,10 @@ export default function TimelineItem({ type, payload }: Props) {
       );
     case "IssueComment":
       return (
-        <li className="box p-4 py-5">
+        <li className="box p-4 py-5 md:min-w-[100px]">
           <h3 className="py-2 font-semibold">{payload.author.login}</h3>
           <div
+            className="prose"
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(payload.bodyHTML) }}
           />
         </li>

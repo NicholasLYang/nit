@@ -1,7 +1,7 @@
 import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
 import { authenticator } from "~/auth.server";
 import { useEffect, useRef, useState } from "react";
-import { useLoaderData, useSubmit } from "@remix-run/react";
+import { useLoaderData, useSearchParams, useSubmit } from "@remix-run/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import ActionButton from "~/components/ActionButton";
 import KeyIcon from "~/components/KeyIcon";
@@ -10,6 +10,7 @@ import { getRecentlyVisitedRepositories } from "~/models/user.server";
 import HomePageRepositories from "~/components/HomePageRepositories";
 import client from "~/apollo-client";
 import { gql } from "@apollo/client";
+import { addGlobalKeyCommands } from "~/key-commands";
 
 export async function action({ request }: ActionArgs) {
   const body = await request.formData();
@@ -62,7 +63,7 @@ export default function Index() {
     pinnedRepositories,
   } = useLoaderData();
   const submit = useSubmit();
-  const [showRepoInput, setShowRepoInput] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useHotkeys("m", () => {
     submit(null, { method: "get", action: `/${login}` });
@@ -70,28 +71,15 @@ export default function Index() {
 
   useHotkeys("g", (event) => {
     event.preventDefault();
-    setShowRepoInput(true);
+    setSearchParams({ state: "goto" });
   });
 
   useEffect(() => {
     if (ref.current) {
       ref.current.focus();
-
-      const onKeydown = (event: KeyboardEvent) => {
-        if (event.metaKey && event.key === "b") {
-          submit(null, { method: "post", action: "/logout" });
-        }
-        if (event.metaKey && event.key === "u") {
-          submit(null, { method: "get", action: "/feedback" });
-        }
-        if (event.metaKey && event.key === "i") {
-          setShowRepoInput(false);
-        }
-      };
-
-      ref.current.addEventListener("keydown", onKeydown);
+      addGlobalKeyCommands(ref.current, submit);
     }
-  }, [ref.current, showRepoInput, setShowRepoInput]);
+  }, [ref.current, searchParams]);
 
   return (
     <main>
@@ -106,7 +94,7 @@ export default function Index() {
       <div className="flex h-screen items-center justify-center">
         <div className="mb-20 flex flex-col items-center text-center">
           <h1 className="py-4 text-2xl font-semibold">gitgot</h1>
-          {showRepoInput ? (
+          {searchParams.get("state") === "goto" ? (
             <div>
               <div className="flex flex-col items-start pb-5">
                 <span>
@@ -135,19 +123,21 @@ export default function Index() {
               </form>
             </div>
           ) : (
-            <div className="space-x-5">
-              <span>
-                <KeyIcon>m</KeyIcon> My Repositories
-              </span>
-              <span>
-                <KeyIcon>g</KeyIcon> Go To Repository
-              </span>
-            </div>
+            <>
+              <div className="space-x-5">
+                <span>
+                  <KeyIcon>m</KeyIcon> My Repositories
+                </span>
+                <span>
+                  <KeyIcon>g</KeyIcon> Go To Repository
+                </span>
+              </div>
+              <HomePageRepositories
+                recentlyVisited={recentlyVisitedRepositories}
+                pinned={pinnedRepositories}
+              />
+            </>
           )}
-          <HomePageRepositories
-            recentlyVisited={recentlyVisitedRepositories}
-            pinned={pinnedRepositories}
-          />
         </div>
       </div>
     </main>

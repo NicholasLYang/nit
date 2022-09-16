@@ -41,7 +41,7 @@ export default function HomePageRepositories({
           <h2 className="text-left text-lg font-semibold">Recently Visited</h2>
           <ul className="flex flex-col gap-2">
             {recentlyVisited.map((repo, index) => (
-              <li className="box w-96">
+              <li key={repo} className="box w-96">
                 <Link className="flex items-center p-3" to={`/${repo}`}>
                   <KeyIcon>{index}</KeyIcon>
                   <span className="truncate px-2 text-sm">{repo}</span>
@@ -56,7 +56,7 @@ export default function HomePageRepositories({
           <h2 className="text-left text-lg font-semibold">Pinned</h2>
           <ul className="flex flex-col gap-2">
             {pinned.map((repo, index) => (
-              <li className="box w-96">
+              <li key={repo} className="box w-96">
                 <Link className="flex items-center p-3" to={`/${repo}`}>
                   <KeyIcon>{index + 4}</KeyIcon>
                   <span className="truncate px-2 text-sm">{repo}</span>

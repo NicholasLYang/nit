@@ -184,7 +184,7 @@ export default function IssuePage() {
         className="box prose w-full whitespace-normal p-5 font-normal"
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.bodyHTML) }}
       />
-      <ul className="space-y-5 p-5">
+      <ul className="flex flex-col space-y-5 whitespace-normal p-5 font-normal">
         {issue.timelineItems.nodes.filter(isDisplayedEvent).map((item) => (
           <TimelineItem type={item.__typename} payload={item} />
         ))}
