@@ -19,7 +19,7 @@ export default function TimelineItem({ type, payload }: Props) {
         COMPLETED: "completed",
         NOT_PLANNED: "not planned",
         REOPENED: "reopened",
-      }[payload.stateReason];
+      }[payload.stateReason as "COMPLETED" | "NOT_PLANNED" | "REOPENED"];
 
       return (
         <li>

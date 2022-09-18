@@ -52,18 +52,18 @@ export type TimelineEventType =
   | "UnsubscribedEvent"
   | "UserBlockedEvent";
 
+interface ProjectCard {}
+
 /** Represents a 'added_to_project' event on a given issue or pull request. */
 export type AddedToProjectEvent = Node & {
   __typename?: "AddedToProjectEvent";
   /** Identifies the actor who performed the event. */
-  actor?: Maybe<Actor>;
+  actor?: Maybe<{ login: string }>;
   /** Identifies the date and time when the object was created. */
   createdAt: string;
   /** Identifies the primary key from the database. */
   databaseId?: Maybe<number>;
   id: string;
-  /** Project referenced by event. */
-  project?: Maybe<Project>;
   /** Project card referenced by this project event. */
   projectCard?: Maybe<ProjectCard>;
   /** Column name referenced by this project event. */

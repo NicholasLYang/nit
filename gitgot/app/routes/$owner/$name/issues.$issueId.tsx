@@ -133,7 +133,7 @@ export async function loader({ params, request }: LoaderArgs) {
     variables: {
       owner: params.owner,
       name: params.name,
-      id: parseInt(params.issueId),
+      id: parseInt(params.issueId!),
     },
     context: { headers: { Authorization: `token ${accessToken}` } },
   });

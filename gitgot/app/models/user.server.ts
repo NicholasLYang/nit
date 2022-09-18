@@ -1,16 +1,11 @@
 import type { User } from "@prisma/client";
 
 import { prisma } from "~/db.server";
-import { HomePageRepositories } from "~/types";
 
 export type { User } from "@prisma/client";
 
 export async function getUserById(id: User["id"]) {
   return prisma.user.findUnique({ where: { id } });
-}
-
-export async function getUserByEmail(email: User["email"]) {
-  return prisma.user.findUnique({ where: { email } });
 }
 
 export async function findOrCreateUser(
@@ -76,8 +71,4 @@ export async function addVisitedRepository(id: User["id"], repoName: string) {
   });
 
   return;
-}
-
-export async function deleteUserByEmail(email: User["email"]) {
-  return prisma.user.delete({ where: { email } });
 }
