@@ -56,8 +56,8 @@ export async function addVisitedRepository(id: User["id"], repoName: string) {
 
   // We only keep the last 4 repositories. Since we're adding one, we slice to
   // just 3 repositories. This could change later.
-  if (recentlyVisitedRepositories.length > 4) {
-    recentlyVisitedRepositories = recentlyVisitedRepositories.slice(0, 4);
+  if (recentlyVisitedRepositories.length > 3) {
+    recentlyVisitedRepositories = recentlyVisitedRepositories.slice(0, 3);
   }
 
   await prisma.user.update({

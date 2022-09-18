@@ -124,6 +124,18 @@ export async function loader({ params, request }: LoaderArgs) {
                     name
                   }
                 }
+                ... on ReferencedEvent {
+                  actor {
+                    login
+                  }
+                  commit {
+                    abbreviatedOid
+                    commitUrl
+                  }
+                  commitRepository {
+                    nameWithOwner
+                  }
+                }
               }
             }
           }

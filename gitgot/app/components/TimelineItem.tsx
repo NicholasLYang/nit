@@ -60,6 +60,17 @@ export default function TimelineItem({ type, payload }: Props) {
           </div>
         </li>
       );
+    case "ReferencedEvent":
+      return (
+        <li>
+          <span className="font-bold">{payload.actor.login}</span> pushed a
+          commit{" "}
+          <a className="hover:underline" href={payload.commit.commitUrl}>
+            {payload.commit.abbreviatedOid}
+          </a>{" "}
+          to {payload.commitRepository.nameWithOwner} that referenced this issue
+        </li>
+      );
     default:
       console.error(`Not implemented yet: ${type}`);
       console.error(payload);
