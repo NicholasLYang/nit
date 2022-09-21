@@ -13,130 +13,18 @@ import ActionButton from "~/components/ActionButton";
 import { Issue, PullRequest } from "~/types";
 import { addVisitedRepository } from "~/models/user.server";
 
-export interface ContextType {
-  issues: Issue[];
-  pullRequests: PullRequest[];
-  readMe: string;
-  hasIssuesEnabled: boolean;
-  id: string;
-  contributing: string | undefined;
-}
-
 export async function loader({ params, request }: LoaderArgs) {
-  const { id, accessToken } = await authenticator.isAuthenticated(request, {
+  const { id } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
 
   await addVisitedRepository(id, `${params.owner}/${params.name}`);
-
-  const { data } = await client.query({
-    query: gql`
-      query Repository($owner: String!, $name: String!) {
-        repository(owner: $owner, name: $name) {
-          id
-          name
-          hasIssuesEnabled
-          defaultBranchRef {
-            name
-          }
-          issues(
-            states: [OPEN]
-            orderBy: { field: UPDATED_AT, direction: DESC }
-            first: 20
-          ) {
-            nodes {
-              id
-              number
-              titleHTML
-              bodyHTML
-            }
-          }
-          pullRequests(
-            states: [OPEN]
-            orderBy: { field: UPDATED_AT, direction: DESC }
-            first: 20
-          ) {
-            nodes {
-              id
-              titleHTML
-              bodyHTML
-              number
-            }
-          }
-          commitComments(first: 10) {
-            nodes {
-              author {
-                avatarUrl
-                login
-              }
-            }
-          }
-        }
-      }
-    `,
-    context: { headers: { Authorization: `bearer ${accessToken}` } },
-    variables: { owner: params.owner, name: params.name },
-  });
-
-  const defaultBranch = data.repository.defaultBranchRef.name;
-  const [readMeRequest, contributingRequest] = await Promise.all([
-    fetch(
-      `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/README.md`
-    ),
-    fetch(
-      `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/CONTRIBUTING.md`
-    ),
-  ]);
-
-  const converter = new Converter();
-
-  let contributing;
-  if (contributingRequest.status !== 404) {
-    const contributingMarkdown = await contributingRequest.text();
-    contributing = converter.makeHtml(contributingMarkdown);
-  }
-
-  let readMe;
-  if (readMeRequest.status === 404) {
-    readMe = "No README found";
-  } else {
-    const readMeMarkdown = await readMeRequest.text();
-    readMe = converter.makeHtml(readMeMarkdown);
-  }
-
-  return {
-    id: data.repository.id,
-    owner: params.owner,
-    name: params.name,
-    hasIssuesEnabled: data.repository.hasIssuesEnabled,
-    issues: data.repository.issues.nodes,
-    pullRequests: data.repository.pullRequests.nodes,
-    readMe,
-    contributing,
-  };
+  return { owner: params.owner, name: params.name };
 }
 
 export default function Repository() {
-  const {
-    id,
-    owner,
-    name,
-    issues,
-    pullRequests,
-    readMe,
-    hasIssuesEnabled,
-    contributing,
-  } = useLoaderData();
   const location = useLocation();
-
-  const context: ContextType = {
-    issues,
-    pullRequests,
-    readMe,
-    hasIssuesEnabled,
-    id,
-    contributing,
-  };
+  const { owner, name } = useLoaderData();
 
   return (
     <main className="flex flex-col items-center pb-10">
@@ -159,7 +47,7 @@ export default function Repository() {
           <span className="font-bold">{owner}</span> / {name}
         </h1>
       </div>
-      <Outlet context={context} />
+      <Outlet />
     </main>
   );
 }

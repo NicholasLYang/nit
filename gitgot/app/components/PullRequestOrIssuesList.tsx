@@ -17,12 +17,22 @@ interface ListProps {
     number: number;
     titleHTML: string;
     bodyHTML: string;
+    assignees: {
+      nodes: Array<{
+        login: string;
+        avatarUrl: string;
+      }>;
+    };
   }>;
   itemName: string;
   itemSlug: string;
 }
 
-export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
+export default function PullRequestOrIssuesList({
+  items,
+  itemName,
+  itemSlug,
+}: ListProps) {
   const submit = useSubmit();
   const { owner, name } = useParams();
   // We keep a hold of these two refs for when we need to scroll into view
@@ -144,13 +154,24 @@ export default function ItemsList({ items, itemName, itemSlug }: ListProps) {
             ref={getRef(i)}
           >
             <Link to={`/${owner}/${name}/${itemSlug}/${item.number}`}>
-              <div className="flex truncate">
+              <div className="flex items-center truncate">
                 <span className="pl-2 pr-4 text-slate-400">#{item.number}</span>
                 <div
                   dangerouslySetInnerHTML={{
                     __html: sanitizeHtml(item.titleHTML),
                   }}
                 />
+                <span className="px-5">
+                  {item.assignees.nodes.map((user) => (
+                    <Link key={user.login} to={`/${user.login}`}>
+                      <img
+                        src={user.avatarUrl}
+                        className="w-8"
+                        alt={`Avatar for user ${user.login}`}
+                      />
+                    </Link>
+                  ))}
+                </span>
               </div>
               {peekedItem === i && (
                 <>

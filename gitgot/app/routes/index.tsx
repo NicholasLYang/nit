@@ -14,7 +14,12 @@ import { addGlobalKeyCommands } from "~/key-commands";
 
 export async function action({ request }: ActionArgs) {
   const body = await request.formData();
-  return redirect(`/${body.get("repository")}`);
+  const repo = body.get("repository");
+  if (repo && repo.toString().includes("/")) {
+    return redirect(`/${repo}`);
+  }
+  const { profile } = await authenticator.isAuthenticated(request);
+  return redirect(`/${profile.displayName}/${repo}`);
 }
 
 export async function loader({ request }: LoaderArgs) {
@@ -102,8 +107,8 @@ export default function Index() {
                 </span>
               </div>
               <form className="flex" method="post" action="/?index">
-                <label htmlFor="email" className="sr-only">
-                  Email
+                <label htmlFor="repository" className="sr-only">
+                  Repository
                 </label>
                 <input
                   type="text"

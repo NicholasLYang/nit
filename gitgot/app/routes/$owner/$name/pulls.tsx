@@ -1,11 +1,62 @@
-import { useOutletContext, useParams, useSubmit } from "@remix-run/react";
+import {
+  useLoaderData,
+  useOutletContext,
+  useParams,
+  useSubmit,
+} from "@remix-run/react";
 import { useHotkeys } from "react-hotkeys-hook";
-import ItemsList from "~/components/ItemsList";
+import PullRequestOrIssuesList from "~/components/PullRequestOrIssuesList";
 import KeyIcon from "~/components/KeyIcon";
-import { ContextType } from "~/routes/$owner/$name";
+import { LoaderArgs } from "@remix-run/node";
+import { authenticator } from "~/auth.server";
+import client from "~/apollo-client";
+import { gql } from "@apollo/client";
+
+export async function loader({ request, params }: LoaderArgs) {
+  const { profile, accessToken } = await authenticator.isAuthenticated(
+    request,
+    {
+      failureRedirect: "/login",
+    }
+  );
+
+  const { data } = await client.query({
+    query: gql`
+      query Repository($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name) {
+          pullRequests(
+            states: [OPEN]
+            orderBy: { field: UPDATED_AT, direction: DESC }
+            first: 20
+          ) {
+            nodes {
+              id
+              titleHTML
+              bodyHTML
+              number
+              assignees(first: 10) {
+                nodes {
+                  login
+                  avatarUrl
+                }
+              }
+            }
+          }
+        }
+      }
+    `,
+    context: { headers: { Authorization: `bearer ${accessToken}` } },
+    variables: { owner: params.owner, name: params.name },
+  });
+
+  return {
+    displayName: profile.displayName,
+    pullRequests: data.repository.pullRequests.nodes,
+  };
+}
 
 export default function PullRequests() {
-  const { pullRequests } = useOutletContext<ContextType>();
+  const { pullRequests } = useLoaderData();
   const params = useParams();
   const submit = useSubmit();
 
@@ -27,7 +78,7 @@ export default function PullRequests() {
           <KeyIcon>n</KeyIcon> New Pull Request
         </span>
       </div>
-      <ItemsList
+      <PullRequestOrIssuesList
         items={pullRequests}
         itemName="pull requests"
         itemSlug="pulls"

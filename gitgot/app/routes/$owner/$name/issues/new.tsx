@@ -1,8 +1,9 @@
-import { ActionArgs, redirect } from "@remix-run/node";
+import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
 import { useEffect, useRef } from "react";
 import { authenticator } from "~/auth.server";
 import {
   SubmitFunction,
+  useLoaderData,
   useOutletContext,
   useParams,
   useSubmit,
@@ -75,10 +76,30 @@ function addGoBackKeyCommand(
   });
 }
 
+export async function loader({ params, request }: LoaderArgs) {
+  const { accessToken } = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
+
+  const { data } = await client.query({
+    query: gql`
+      query Repository($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name) {
+          id
+        }
+      }
+    `,
+    context: { headers: { Authorization: `bearer ${accessToken}` } },
+    variables: { owner: params.owner, name: params.name },
+  });
+
+  return data.repository.id;
+}
+
 export default function NewIssue() {
   const ref = useRef<HTMLInputElement | null>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-  const context = useOutletContext<ContextType>();
+  const repositoryId = useLoaderData();
   const submit = useSubmit();
   const params = useParams();
 
@@ -134,7 +155,7 @@ export default function NewIssue() {
           type="text"
           className="hidden"
           readOnly
-          value={context.id}
+          value={repositoryId}
         />
         <button className="box w-40 py-3" type="submit">
           Submit

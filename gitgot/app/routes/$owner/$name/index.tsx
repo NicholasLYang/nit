@@ -1,12 +1,70 @@
-import { Link, useOutletContext, useParams, useSubmit } from "@remix-run/react";
+import { Link, useLoaderData, useParams, useSubmit } from "@remix-run/react";
 import KeyIcon from "~/components/KeyIcon";
 import { useHotkeys } from "react-hotkeys-hook";
-import { ContextType } from "~/routes/$owner/$name";
+import { gql } from "@apollo/client";
+import client from "~/apollo-client";
+import { LoaderArgs } from "@remix-run/node";
+import { authenticator } from "~/auth.server";
+import { Converter } from "showdown";
+
+export async function loader({ params, request }: LoaderArgs) {
+  const { accessToken } = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
+
+  const { data } = await client.query({
+    query: gql`
+      query Repository($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name) {
+          id
+          name
+          hasIssuesEnabled
+          defaultBranchRef {
+            name
+          }
+        }
+      }
+    `,
+    context: { headers: { Authorization: `bearer ${accessToken}` } },
+    variables: { owner: params.owner, name: params.name },
+  });
+
+  const defaultBranch = data.repository.defaultBranchRef.name;
+  const [readMeRequest, contributingRequest] = await Promise.all([
+    fetch(
+      `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/README.md`
+    ),
+    fetch(
+      `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/CONTRIBUTING.md`
+    ),
+  ]);
+
+  const converter = new Converter();
+
+  let contributing;
+  if (contributingRequest.status !== 404) {
+    const contributingMarkdown = await contributingRequest.text();
+    contributing = converter.makeHtml(contributingMarkdown);
+  }
+
+  let readMe;
+  if (readMeRequest.status === 404) {
+    readMe = "No README found";
+  } else {
+    const readMeMarkdown = await readMeRequest.text();
+    readMe = converter.makeHtml(readMeMarkdown);
+  }
+
+  return {
+    hasIssuesEnabled: data.repository.hasIssuesEnabled,
+    readMe,
+    contributing,
+  };
+}
 
 export default function Index() {
   const { owner, name } = useParams();
-  const { contributing, readMe, hasIssuesEnabled } =
-    useOutletContext<ContextType>();
+  const { readMe, hasIssuesEnabled, contributing } = useLoaderData();
   const submit = useSubmit();
 
   useHotkeys("i", () => {

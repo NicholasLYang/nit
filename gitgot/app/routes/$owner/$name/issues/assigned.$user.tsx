@@ -1,3 +1,7 @@
+import { gql } from "@apollo/client";
+import client from "~/apollo-client";
+import { authenticator } from "~/auth.server";
+import { LoaderArgs } from "@remix-run/node";
 import {
   useLoaderData,
   useParams,
@@ -5,37 +9,23 @@ import {
   useSubmit,
 } from "@remix-run/react";
 import { useHotkeys } from "react-hotkeys-hook";
-import PullRequestOrIssuesList from "~/components/PullRequestOrIssuesList";
-import KeyIcon from "~/components/KeyIcon";
-import { ActionArgs } from "@remix-run/server-runtime";
-import { LoaderArgs, redirect } from "@remix-run/node";
 import { GoToIssueForm } from "~/components/GoToIssueForm";
-import { authenticator } from "~/auth.server";
-import client from "~/apollo-client";
-import { gql } from "@apollo/client";
-
-export async function action({ request, params }: ActionArgs) {
-  const formData = await request.formData();
-  return redirect(
-    `/${params.owner}/${params.name}/issues/${formData.get("issueNumber")}`
-  );
-}
+import KeyIcon from "~/components/KeyIcon";
+import PullRequestOrIssuesList from "~/components/PullRequestOrIssuesList";
 
 export async function loader({ request, params }: LoaderArgs) {
-  const { profile, accessToken } = await authenticator.isAuthenticated(
-    request,
-    {
-      failureRedirect: "/login",
-    }
-  );
+  const { accessToken } = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
 
   const { data } = await client.query({
     query: gql`
-      query Repository($owner: String!, $name: String!) {
+      query Repository($owner: String!, $name: String!, $user: String!) {
         repository(owner: $owner, name: $name) {
           issues(
             states: [OPEN]
             orderBy: { field: UPDATED_AT, direction: DESC }
+            filterBy: { assignee: $user }
             first: 20
           ) {
             nodes {
@@ -55,25 +45,25 @@ export async function loader({ request, params }: LoaderArgs) {
       }
     `,
     context: { headers: { Authorization: `bearer ${accessToken}` } },
-    variables: { owner: params.owner, name: params.name },
+    variables: { owner: params.owner, name: params.name, user: params.user },
   });
 
   return {
-    displayName: profile.displayName,
+    user: params.user,
     issues: data.repository.issues.nodes,
   };
 }
 
-export default function IssuesIndex() {
+export default function AssigneeIssues() {
   const { owner, name } = useParams();
-  const { displayName, issues } = useLoaderData();
+  const { user, issues } = useLoaderData();
   const submit = useSubmit();
   const [searchParams, setSearchParams] = useSearchParams();
 
   useHotkeys("h", () => {
     submit(null, {
       method: "get",
-      action: `/${owner}/${name}`,
+      action: `/${owner}/${name}/issues`,
     });
   });
 
@@ -88,32 +78,22 @@ export default function IssuesIndex() {
     setSearchParams({ state: "goto" });
   });
 
-  useHotkeys("m", () => {
-    submit(null, {
-      method: "get",
-      action: `/${owner}/${name}/issues/assigned/${displayName}`,
-    });
-  });
-
   if (searchParams.get("state") === "goto") {
     return <GoToIssueForm />;
   }
 
   return (
     <div className="w-2/3 max-w-4xl">
-      <h1 className="py-5 text-3xl font-bold">Issues</h1>
+      <h1 className="py-5 text-3xl font-bold">Issues for {user}</h1>
       <div className="space-x-5 py-2">
         <span>
-          <KeyIcon>h</KeyIcon> Go back to repository
+          <KeyIcon>h</KeyIcon> Go back to issues
         </span>
         <span>
           <KeyIcon>n</KeyIcon> New issue
         </span>
         <span>
           <KeyIcon>g</KeyIcon> Go to issue
-        </span>
-        <span>
-          <KeyIcon>m</KeyIcon> Go to assigned issues
         </span>
       </div>
       <PullRequestOrIssuesList
