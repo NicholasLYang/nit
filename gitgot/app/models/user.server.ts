@@ -52,7 +52,7 @@ export async function addVisitedRepository(id: User["id"], repoName: string) {
   let recentlyVisitedRepositories = user.recentlyVisitedRepositories
     .split(" ")
     // If we've seen the repo already, we filter it out
-    .filter((repo) => repo !== repoName);
+    .filter((repo) => repo.toLowerCase() !== repoName.toLowerCase());
 
   // We only keep the last 4 repositories. Since we're adding one, we slice to
   // just 3 repositories. This could change later.

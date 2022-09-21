@@ -81,7 +81,7 @@ export default function PullRequests() {
       <PullRequestOrIssuesList
         items={pullRequests}
         itemName="pull requests"
-        itemSlug="pulls"
+        itemSlug="pull"
       />
     </div>
   );
