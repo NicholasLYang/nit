@@ -104,3 +104,8 @@ const repos = [
 export function getRandomRepository() {
   return repos[Math.floor(Math.random() * repos.length)];
 }
+
+export function base64Decode(bString: string): string {
+  const buffer = new Buffer(bString, "base64");
+  return buffer.toString();
+}

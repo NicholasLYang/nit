@@ -6,6 +6,8 @@ import client from "~/apollo-client";
 import { LoaderArgs } from "@remix-run/node";
 import { authenticator } from "~/auth.server";
 import { Converter } from "showdown";
+import { Octokit } from "@octokit/rest";
+import { base64Decode } from "~/utils";
 
 export async function loader({ params, request }: LoaderArgs) {
   const { accessToken } = await authenticator.isAuthenticated(request, {
@@ -19,52 +21,48 @@ export async function loader({ params, request }: LoaderArgs) {
           id
           name
           hasIssuesEnabled
-          defaultBranchRef {
-            name
-          }
         }
       }
     `,
     context: { headers: { Authorization: `bearer ${accessToken}` } },
     variables: { owner: params.owner, name: params.name },
   });
+  const octokit = new Octokit({ auth: accessToken });
 
-  const defaultBranch = data.repository.defaultBranchRef.name;
-  const [readMeRequest, contributingRequest] = await Promise.all([
-    fetch(
-      `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/README.md`
-    ),
-    fetch(
-      `https://raw.githubusercontent.com/${params.owner}/${params.name}/${defaultBranch}/CONTRIBUTING.md`
-    ),
+  const [readMeRequest, contributingRequest] = await Promise.allSettled([
+    octokit.rest.repos.getReadme({
+      owner: params.owner,
+      repo: params.name,
+    }),
+    octokit.rest.repos.getContent({
+      owner: params.owner,
+      repo: params.name,
+      path: "CONTRIBUTING.md",
+    }),
   ]);
 
   const converter = new Converter();
 
-  let contributing;
-  if (contributingRequest.status !== 404) {
-    const contributingMarkdown = await contributingRequest.text();
-    contributing = converter.makeHtml(contributingMarkdown);
+  let readMe;
+  if (readMeRequest.status === "fulfilled") {
+    const readMeMarkdown = base64Decode(readMeRequest.value.data.content || "");
+    readMe = converter.makeHtml(readMeMarkdown);
+  } else {
+    readMe = "No README for repository";
   }
 
-  let readMe;
-  if (readMeRequest.status === 404) {
-    readMe = "No README found";
-  } else {
-    const readMeMarkdown = await readMeRequest.text();
-    readMe = converter.makeHtml(readMeMarkdown);
-  }
+  let hasContributing = contributingRequest.status === "fulfilled";
 
   return {
     hasIssuesEnabled: data.repository.hasIssuesEnabled,
     readMe,
-    contributing,
+    hasContributing,
   };
 }
 
 export default function Index() {
   const { owner, name } = useParams();
-  const { readMe, hasIssuesEnabled, contributing } = useLoaderData();
+  const { readMe, hasIssuesEnabled, hasContributing } = useLoaderData();
   const submit = useSubmit();
 
   useHotkeys("i", () => {
@@ -82,7 +80,7 @@ export default function Index() {
     submit(null, { method: "get", action: `/${owner}/${name}/search` });
   });
   useHotkeys("c", () => {
-    if (contributing) {
+    if (hasContributing) {
       submit(null, { method: "get", action: `/${owner}/${name}/contributing` });
     }
   });
@@ -107,7 +105,7 @@ export default function Index() {
         <Link to={`/${owner}/${name}/pulls`}>
           <KeyIcon>p</KeyIcon> Pull requests
         </Link>
-        {contributing && (
+        {hasContributing && (
           <Link to={`/${owner}/${name}/pulls`}>
             <KeyIcon>c</KeyIcon> Contributing
           </Link>

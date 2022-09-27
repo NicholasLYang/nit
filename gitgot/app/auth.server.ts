@@ -44,7 +44,7 @@ authenticator.use(
           profile._json.email,
           profile.displayName
         );
-
+        console.log("DONE");
         return { accessToken, profile, id: user.id };
       } catch (e) {
         console.error(e);
