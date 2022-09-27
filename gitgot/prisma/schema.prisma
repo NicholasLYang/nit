@@ -9,7 +9,7 @@ generator client {
 
 model User {
   id    String @id @default(cuid())
-  email String
+  email String?
   githubLogin String
   githubId Int @unique
 
