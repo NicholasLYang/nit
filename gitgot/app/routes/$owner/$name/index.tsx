@@ -84,6 +84,10 @@ export default function Index() {
       submit(null, { method: "get", action: `/${owner}/${name}/contributing` });
     }
   });
+
+  useHotkeys("d", () => {
+    submit(null, { method: "get", action: `/${owner}/${name}/docs` });
+  });
   useHotkeys("j", () => {
     window.scrollBy({ top: window.innerHeight, left: 0, behavior: "smooth" });
   });
@@ -110,6 +114,9 @@ export default function Index() {
             <KeyIcon>c</KeyIcon> Contributing
           </Link>
         )}
+        <Link to={`/${owner}/${name}/docs`}>
+          <KeyIcon>d</KeyIcon> Documentation
+        </Link>
       </div>
       <div className="space-x-5 pt-8">
         <span>

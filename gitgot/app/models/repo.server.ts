@@ -26,7 +26,16 @@ export async function getRepositoryDocumentation(
     });
 
     const cargoToml = toml.parse(base64Decode(res.data.content));
-    return cargoToml.dependencies;
+    return Object.entries(cargoToml.dependencies).map(
+      ([depName, depVersion]) => {
+        const version =
+          typeof depVersion === "string" ? depVersion : depVersion.version;
+        return {
+          name: depName,
+          url: `https://docs.rs/${depName}/${version}/${depName}`,
+        };
+      }
+    );
   }
 
   return null;
