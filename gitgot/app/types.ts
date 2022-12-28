@@ -14,6 +14,14 @@ export interface PullRequest {
   bodyHTML: string;
 }
 
+// Either the issue is not encrypted, it is encrypted and available to the user,
+// or it is encrypted and not available to the user
+export enum DecryptionStatus {
+  Open,
+  MySecret,
+  NotMySecret,
+}
+
 export interface HomePageRepositories {
   recentlyVisited: string[];
   pinned: string[];

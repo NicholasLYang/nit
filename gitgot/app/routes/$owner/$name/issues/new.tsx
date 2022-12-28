@@ -1,18 +1,16 @@
 import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
 import { useEffect, useRef } from "react";
 import { authenticator } from "~/auth.server";
-import {
-  SubmitFunction,
-  useLoaderData,
-  useParams,
-  useSubmit,
-} from "@remix-run/react";
-import client from "~/apollo-client";
-import { gql } from "@apollo/client";
+import { SubmitFunction, useParams, useSubmit } from "@remix-run/react";
+
 import KeyIcon from "~/components/KeyIcon";
 import { addGlobalKeyCommands } from "~/key-commands";
 import { useHotkeys } from "react-hotkeys-hook";
-import { createIssue, encryptIssue } from "~/models/issue.server";
+import {
+  createIssue,
+  encryptIssue,
+  uploadIssueToGitHub,
+} from "~/models/issue.server";
 
 export async function action({ request, params }: ActionArgs) {
   const formData = await request.formData();
@@ -31,61 +29,24 @@ export async function action({ request, params }: ActionArgs) {
     body,
   });
 
-  const {
-    data: { repository },
-  } = await client.query({
-    query: gql`
-      query Repository($owner: String!, $name: String!) {
-        repository(owner: $owner, name: $name) {
-          id
-        }
-      }
-    `,
-    context: { headers: { Authorization: `bearer ${accessToken}` } },
-    variables: { owner: params.owner, name: params.name },
-  });
-
-  const { data } = await client.mutate({
-    mutation: gql`
-      mutation CreateIssue(
-        $title: String!
-        $body: String!
-        $repositoryId: ID!
-      ) {
-        createIssue(
-          input: { title: $title, body: $body, repositoryId: $repositoryId }
-        ) {
-          issue {
-            id
-            number
-          }
-        }
-      }
-    `,
-    variables: {
-      title: encryptedTitle,
-      body: encryptedBody,
-      repositoryId: repository.id,
-    },
-    context: {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
+  const { issueNumber } = await uploadIssueToGitHub({
+    accessToken,
+    repositoryOwner: params.owner,
+    repositoryName: params.name,
+    encryptedTitle,
+    encryptedBody,
   });
 
   await createIssue({
     repositoryName: params.name,
     repositoryOwner: params.owner,
-    number: data.createIssue.issue.number,
+    number: issueNumber,
     userId,
     iv,
     key,
   });
 
-  return redirect(
-    `/${params.owner}/${params.name}/issues/${data.createIssue.issue.number}`
-  );
+  return redirect(`/${params.owner}/${params.name}/issues/${issueNumber}`);
 }
 
 function addGoBackKeyCommand(

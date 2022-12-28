@@ -13,6 +13,8 @@ import { GoToIssueForm } from "~/components/GoToIssueForm";
 import { authenticator } from "~/auth.server";
 import client from "~/apollo-client";
 import { gql } from "@apollo/client";
+import { decryptIssue } from "~/models/issue.server";
+import { DecryptionStatus } from "~/types";
 
 export async function action({ request, params }: ActionArgs) {
   const formData = await request.formData();
@@ -22,7 +24,7 @@ export async function action({ request, params }: ActionArgs) {
 }
 
 export async function loader({ request, params }: LoaderArgs) {
-  const { profile, accessToken } = await authenticator.isAuthenticated(
+  const { profile, accessToken, id } = await authenticator.isAuthenticated(
     request,
     {
       failureRedirect: "/login",
@@ -41,8 +43,8 @@ export async function loader({ request, params }: LoaderArgs) {
             nodes {
               id
               number
-              titleHTML
-              bodyHTML
+              title
+              body
               assignees(first: 10) {
                 nodes {
                   login
@@ -58,9 +60,34 @@ export async function loader({ request, params }: LoaderArgs) {
     variables: { owner: params.owner, name: params.name },
   });
 
+  const issues = await Promise.all(
+    data.repository.issues.nodes.map(async (issue) => {
+      console.log("ISSUE");
+      console.log(issue);
+      const decryptedIssue = await decryptIssue({
+        encryptedTitle: issue.title,
+        encryptedBody: issue.body,
+        number: issue.number,
+        repositoryOwner: params.owner,
+        repositoryName: params.name,
+        userId: id,
+      });
+      if (decryptedIssue.status === DecryptionStatus.MySecret) {
+        return {
+          ...issue,
+          status: decryptedIssue.status,
+          title: decryptedIssue.title,
+          body: decryptedIssue.body,
+        };
+      } else {
+        return { ...issue, status: decryptedIssue.status };
+      }
+    })
+  );
+
   return {
     displayName: profile.displayName,
-    issues: data.repository.issues.nodes,
+    issues,
   };
 }
 

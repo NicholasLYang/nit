@@ -3,11 +3,12 @@ import gql from "graphql-tag";
 import { Link, useLoaderData, useParams, useSubmit } from "@remix-run/react";
 import { LoaderArgs } from "@remix-run/node";
 import { authenticator } from "~/auth.server";
-import sanitizeHtml from "sanitize-html";
-import { useHotkeys } from "react-hotkeys-hook";
 import KeyIcon from "~/components/KeyIcon";
 import TimelineItem from "~/components/TimelineItem";
 import { decryptIssue } from "~/models/issue.server";
+import IssueLockIcon from "~/components/IssueLockIcon";
+import { DecryptionStatus } from "~/types";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export async function loader({ params, request }: LoaderArgs) {
   const { accessToken, id: userId } = await authenticator.isAuthenticated(
@@ -156,7 +157,7 @@ export async function loader({ params, request }: LoaderArgs) {
     context: { headers: { Authorization: `token ${accessToken}` } },
   });
 
-  const { title, body } = await decryptIssue({
+  const { status, ...decryptedIssue } = await decryptIssue({
     encryptedTitle: data.repository.issue.title,
     encryptedBody: data.repository.issue.body,
     number: issueNumber,
@@ -165,15 +166,20 @@ export async function loader({ params, request }: LoaderArgs) {
     userId,
   });
 
-  console.log(title);
-  console.log(body);
-  return {
-    issue: { ...data.repository.issue, title, body },
-  };
+  if (status === DecryptionStatus.MySecret) {
+    return {
+      ...data.repository.issue,
+      status,
+      title: decryptedIssue.title,
+      body: decryptedIssue.body,
+    };
+  } else {
+    return { ...data.repository.issue, status };
+  }
 }
 
 export default function IssuePage() {
-  const { issue } = useLoaderData();
+  const issue = useLoaderData();
   const { owner, name } = useParams();
   const submit = useSubmit();
 
@@ -201,17 +207,20 @@ export default function IssuePage() {
         </span>
       </div>
       <div className="pt-16 pb-8">
-        <h1 className="prose text-3xl font-bold">{issue.title}</h1>
+        <span className="flex space-x-2">
+          <IssueLockIcon status={issue.status} />
+          <h1 className="prose text-3xl font-bold">{issue.title}</h1>
+        </span>
         <h2 className="text-lg">
           <Link to={`/${issue.author.login}`}>{issue.author.login}</Link>
         </h2>
+        <div>{issue.body}</div>
+        <ul className="flex flex-col space-y-5 whitespace-normal p-5 font-normal">
+          {issue.timelineItems.nodes.filter(isDisplayedEvent).map((item) => (
+            <TimelineItem key={item.id} type={item.__typename} payload={item} />
+          ))}
+        </ul>
       </div>
-      <div>{issue.body}</div>
-      <ul className="flex flex-col space-y-5 whitespace-normal p-5 font-normal">
-        {issue.timelineItems.nodes.filter(isDisplayedEvent).map((item) => (
-          <TimelineItem type={item.__typename} payload={item} />
-        ))}
-      </ul>
     </div>
   );
 }
