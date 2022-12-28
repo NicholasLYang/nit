@@ -2,8 +2,6 @@ import { Octokit } from "@octokit/rest";
 import * as toml from "toml";
 import { base64Decode } from "~/utils";
 
-export async function addRepository(githubId: number, nameWithOwner: string) {}
-
 export async function getRepositoryDocumentation(
   owner: string,
   name: string,

@@ -14,15 +14,35 @@ model User {
   githubId Int @unique
 
   recentlyVisitedRepositories String @default("")
-
+  issues                     IssueMembership[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model Issue {
+  id String @id @default(cuid())
+  repositoryId String
+  repository Repository @relation(fields: [repositoryId], references: [id])
+  number Int
+  members IssueMembership[]
+  key Bytes
+  iv Bytes
+}
+
+model IssueMembership {
+  issue Issue @relation(fields: [issueId], references: [id])
+  issueId String
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  role String
+
+  @@id([issueId, userId])
+}
+
 model Repository {
   id String @id @default(cuid())
-  githubId Int @unique
-  nameWithOwner String
+  nameWithOwner String @unique
+  issues Issue[]
 }
 
 model RepositoryDocumentation {

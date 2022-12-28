@@ -15,7 +15,6 @@ interface ListProps {
 }
 
 export default function DocsList({ items }: ListProps) {
-  const submit = useSubmit();
   // We keep a hold of these two refs for when we need to scroll into view
   const nextSelectedRef = useRef<HTMLLIElement>(null);
   const previousSelectedRef = useRef<HTMLLIElement>(null);

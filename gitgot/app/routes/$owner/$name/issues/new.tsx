@@ -4,25 +4,45 @@ import { authenticator } from "~/auth.server";
 import {
   SubmitFunction,
   useLoaderData,
-  useOutletContext,
   useParams,
   useSubmit,
 } from "@remix-run/react";
 import client from "~/apollo-client";
 import { gql } from "@apollo/client";
-import { ContextType } from "~/routes/$owner/$name";
 import KeyIcon from "~/components/KeyIcon";
 import { addGlobalKeyCommands } from "~/key-commands";
 import { useHotkeys } from "react-hotkeys-hook";
+import { createIssue, encryptIssue } from "~/models/issue.server";
 
 export async function action({ request, params }: ActionArgs) {
   const formData = await request.formData();
   const title = formData.get("title");
   const body = formData.get("body");
-  const repositoryId = formData.get("repositoryId");
 
-  const { accessToken } = await authenticator.isAuthenticated(request, {
-    failureRedirect: "/login",
+  const { accessToken, id: userId } = await authenticator.isAuthenticated(
+    request,
+    {
+      failureRedirect: "/login",
+    }
+  );
+
+  const { encryptedTitle, encryptedBody, key, iv } = await encryptIssue({
+    title,
+    body,
+  });
+
+  const {
+    data: { repository },
+  } = await client.query({
+    query: gql`
+      query Repository($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name) {
+          id
+        }
+      }
+    `,
+    context: { headers: { Authorization: `bearer ${accessToken}` } },
+    variables: { owner: params.owner, name: params.name },
   });
 
   const { data } = await client.mutate({
@@ -43,15 +63,24 @@ export async function action({ request, params }: ActionArgs) {
       }
     `,
     variables: {
-      title,
-      body,
-      repositoryId,
+      title: encryptedTitle,
+      body: encryptedBody,
+      repositoryId: repository.id,
     },
     context: {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     },
+  });
+
+  await createIssue({
+    repositoryName: params.name,
+    repositoryOwner: params.owner,
+    number: data.createIssue.issue.number,
+    userId,
+    iv,
+    key,
   });
 
   return redirect(
@@ -76,30 +105,9 @@ function addGoBackKeyCommand(
   });
 }
 
-export async function loader({ params, request }: LoaderArgs) {
-  const { accessToken } = await authenticator.isAuthenticated(request, {
-    failureRedirect: "/login",
-  });
-
-  const { data } = await client.query({
-    query: gql`
-      query Repository($owner: String!, $name: String!) {
-        repository(owner: $owner, name: $name) {
-          id
-        }
-      }
-    `,
-    context: { headers: { Authorization: `bearer ${accessToken}` } },
-    variables: { owner: params.owner, name: params.name },
-  });
-
-  return data.repository.id;
-}
-
 export default function NewIssue() {
   const ref = useRef<HTMLInputElement | null>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-  const repositoryId = useLoaderData();
   const submit = useSubmit();
   const params = useParams();
 
@@ -149,13 +157,6 @@ export default function NewIssue() {
           placeholder="Your description here"
           rows={8}
           ref={textAreaRef}
-        />
-        <input
-          name="repositoryId"
-          type="text"
-          className="hidden"
-          readOnly
-          value={repositoryId}
         />
         <button className="box w-40 py-3" type="submit">
           Submit

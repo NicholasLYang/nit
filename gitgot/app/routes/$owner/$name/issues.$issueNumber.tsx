@@ -7,21 +7,27 @@ import sanitizeHtml from "sanitize-html";
 import { useHotkeys } from "react-hotkeys-hook";
 import KeyIcon from "~/components/KeyIcon";
 import TimelineItem from "~/components/TimelineItem";
+import { decryptIssue } from "~/models/issue.server";
 
 export async function loader({ params, request }: LoaderArgs) {
-  const { accessToken } = await authenticator.isAuthenticated(request, {
-    failureRedirect: "/login",
-  });
+  const { accessToken, id: userId } = await authenticator.isAuthenticated(
+    request,
+    {
+      failureRedirect: "/login",
+    }
+  );
+
+  const issueNumber = parseInt(params.issueNumber!);
 
   const { data } = await client.query({
     query: gql`
-      query Issue($owner: String!, $name: String!, $id: Int!) {
+      query Issue($owner: String!, $name: String!, $number: Int!) {
         repository(owner: $owner, name: $name) {
-          issue(number: $id) {
+          issue(number: $number) {
             id
-            bodyHTML
+            body
             number
-            titleHTML
+            title
             author {
               login
             }
@@ -145,13 +151,24 @@ export async function loader({ params, request }: LoaderArgs) {
     variables: {
       owner: params.owner,
       name: params.name,
-      id: parseInt(params.issueId!),
+      number: issueNumber,
     },
     context: { headers: { Authorization: `token ${accessToken}` } },
   });
 
+  const { title, body } = await decryptIssue({
+    encryptedTitle: data.repository.issue.title,
+    encryptedBody: data.repository.issue.body,
+    number: issueNumber,
+    repositoryOwner: params.owner,
+    repositoryName: params.name,
+    userId,
+  });
+
+  console.log(title);
+  console.log(body);
   return {
-    issue: data.repository.issue,
+    issue: { ...data.repository.issue, title, body },
   };
 }
 
@@ -184,22 +201,12 @@ export default function IssuePage() {
         </span>
       </div>
       <div className="pt-16 pb-8">
-        <h1
-          className="prose text-3xl font-bold"
-          dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.titleHTML) }}
-        />
+        <h1 className="prose text-3xl font-bold">{issue.title}</h1>
         <h2 className="text-lg">
           <Link to={`/${issue.author.login}`}>{issue.author.login}</Link>
         </h2>
       </div>
-      {issue.bodyHTML ? (
-        <div
-          className="box prose w-full whitespace-normal p-5 font-normal"
-          dangerouslySetInnerHTML={{ __html: sanitizeHtml(issue.bodyHTML) }}
-        />
-      ) : (
-        <div className="box w-2/3 p-5 italic">No description provided</div>
-      )}
+      <div>{issue.body}</div>
       <ul className="flex flex-col space-y-5 whitespace-normal p-5 font-normal">
         {issue.timelineItems.nodes.filter(isDisplayedEvent).map((item) => (
           <TimelineItem type={item.__typename} payload={item} />
