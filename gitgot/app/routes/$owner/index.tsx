@@ -168,50 +168,10 @@ export default function OwnerPage() {
   );
 
   return (
-    <div className="flex w-full flex-col items-center">
-      <div className="py-2 text-center">
-        <h1 className="text-2xl font-semibold">{name}</h1>
-        <h2>{login}</h2>
-      </div>
-      <div className="space-x-5">
-        <span>
-          <KeyIcon>h</KeyIcon> Go home
-        </span>
-        <span>
-          <KeyIcon>n</KeyIcon> Next page of repositories
-        </span>
-        <span>
-          <KeyIcon>b</KeyIcon> Previous page of repositories
-        </span>
-      </div>
-      <h2 className="pb-5 pt-10 text-xl font-semibold">Repositories</h2>
-      <div className="space-x-5">
-        <span>
-          <KeyIcon>j</KeyIcon> Next repository
-        </span>
-        <span>
-          <KeyIcon>k</KeyIcon> Previous repository
-        </span>
-        <span>
-          <KeyIcon>ENTER</KeyIcon> Select repository
-        </span>
-      </div>
-      <ul className="flex w-96 flex-col space-y-5 p-4">
-        {repositories.map((repo, i) => (
-          <li
-            className={classNames(
-              "whitespace-normal border-2 border-slate-800 p-2 shadow-block",
-              selectedRepository === i && "border-blue-400"
-            )}
-            key={repo.nameWithOwner}
-            ref={getRef(i)}
-          >
-            <Link to={`/${repo.nameWithOwner}`}>
-              <h3 className="text-lg">{repo.nameWithOwner}</h3>
-            </Link>
-          </li>
-        ))}
-      </ul>
+    <div className="flex w-full">
+      <h1>
+        Create <span className="text-bold">Secret</span> GitHub Issues
+      </h1>
     </div>
   );
 }

@@ -1,25 +1,18 @@
 import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
 import { authenticator } from "~/auth.server";
-import { useEffect, useRef, useState } from "react";
-import { useLoaderData, useSearchParams, useSubmit } from "@remix-run/react";
-import { useHotkeys } from "react-hotkeys-hook";
-import ActionButton from "~/components/ActionButton";
-import KeyIcon from "~/components/KeyIcon";
 import { getRandomRepository } from "~/utils";
 import { getRecentlyVisitedRepositories } from "~/models/user.server";
-import HomePageRepositories from "~/components/HomePageRepositories";
 import client from "~/apollo-client";
 import { gql } from "@apollo/client";
-import { addGlobalKeyCommands } from "~/key-commands";
+import { Form } from "@remix-run/react";
 
 export async function action({ request }: ActionArgs) {
   const body = await request.formData();
   const repo = body.get("repository");
-  if (repo && repo.toString().includes("/")) {
-    return redirect(`/${repo}`);
+  if (repo === null || !repo.includes("/")) {
+    return;
   }
-  const { profile } = await authenticator.isAuthenticated(request);
-  return redirect(`/${profile.displayName}/${repo}`);
+  return redirect(`/${repo}/issues`);
 }
 
 export async function loader({ request }: LoaderArgs) {
@@ -60,91 +53,22 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export default function Index() {
-  const ref = useRef<HTMLInputElement>(null);
-  const {
-    login,
-    randomRepository,
-    recentlyVisitedRepositories,
-    pinnedRepositories,
-  } = useLoaderData();
-  const submit = useSubmit();
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  useHotkeys("m", () => {
-    submit(null, { method: "get", action: `/${login}` });
-  });
-
-  useHotkeys("g", (event) => {
-    event.preventDefault();
-    setSearchParams({ state: "goto" });
-  });
-
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.focus();
-      addGlobalKeyCommands(ref.current, submit);
-    }
-  }, [ref.current, searchParams]);
-
   return (
-    <main>
-      <div className="flex space-x-5 pt-5 pl-5">
-        <ActionButton method="post" action="/logout">
-          Log out <span className="text-slate-400">&#8984;B</span>
-        </ActionButton>
-        <ActionButton method="get" action="/feedback">
-          Feedback <span className="text-slate-400">&#8984;U</span>
-        </ActionButton>
-      </div>
-      <div className="flex items-center justify-center">
-        <div className="mb-20 flex flex-col items-center text-center">
-          <h1 className="py-4 text-2xl font-semibold">gitgot</h1>
-          {searchParams.get("state") === "goto" ? (
-            <div>
-              <div className="flex flex-col items-start pb-5">
-                <span>
-                  <KeyIcon>&#8984;I</KeyIcon> Back
-                </span>
-              </div>
-              <form className="flex" method="post" action="/?index">
-                <label htmlFor="repository" className="sr-only">
-                  Repository
-                </label>
-                <input
-                  type="text"
-                  ref={ref}
-                  tabIndex={100}
-                  name="repository"
-                  id="repository"
-                  placeholder={randomRepository}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-                <button
-                  className="box m-2 disabled:bg-black disabled:text-white"
-                  type="submit"
-                >
-                  ENTER
-                </button>
-              </form>
-            </div>
-          ) : (
-            <>
-              <div className="space-x-5">
-                <span>
-                  <KeyIcon>m</KeyIcon> My Repositories
-                </span>
-                <span>
-                  <KeyIcon>g</KeyIcon> Go To Repository
-                </span>
-              </div>
-              <HomePageRepositories
-                recentlyVisited={recentlyVisitedRepositories}
-                pinned={pinnedRepositories}
-              />
-            </>
-          )}
-        </div>
-      </div>
-    </main>
+    <div className="flex items-center py-20 px-24">
+      <Form method="post">
+        <h1 className="py-2 text-lg">Enter repository</h1>
+        <span className="space-x-2">
+          <input
+            name="repository"
+            pattern="[\w-]+/[\w-]+"
+            className="rounded p-2 text-lg"
+            placeholder="owner/repo"
+          />
+          <button className="inline-flex items-center rounded border border-transparent bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+            Go
+          </button>
+        </span>
+      </Form>
+    </div>
   );
 }

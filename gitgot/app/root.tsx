@@ -64,8 +64,41 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="h-full">
-        <Outlet />
+      <body className="min-h-full w-full bg-[#ffd7ca]">
+        <div className="flex items-stretch">
+          <div className="max-w-lg space-y-5 px-24 py-20">
+            <h1 className="text-4xl font-extralight">
+              Create <span className="font-semibold">Secret</span>
+              <br /> GitHub Issues
+            </h1>
+            <p>
+              Why?
+              <ul className="list-inside list-disc">
+                <li>To report bugs with proprietary code.</li>
+                <li>To discuss potentially non-public plans.</li>
+                <li>Or maybe you just don't like snoopers</li>
+              </ul>
+            </p>
+            <p>
+              How?
+              <ul className="list-inside list-disc">
+                <li>Write an issue and add whoever you want.</li>
+                <li>Owner of the repository can always read the issue</li>
+              </ul>
+            </p>
+            <p>
+              Don't
+              <ul className="list-inside list-disc">
+                <li>
+                  Use this to disclose security issues or extremely sensitive
+                  information.
+                </li>
+                <li>Write creepy stuff.</li>
+              </ul>
+            </p>
+          </div>
+          <Outlet />
+        </div>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
