@@ -62,8 +62,6 @@ export async function loader({ request, params }: LoaderArgs) {
 
   const issues = await Promise.all(
     data.repository.issues.nodes.map(async (issue) => {
-      console.log("ISSUE");
-      console.log(issue);
       const decryptedIssue = await decryptIssue({
         encryptedTitle: issue.title,
         encryptedBody: issue.body,
@@ -75,6 +73,7 @@ export async function loader({ request, params }: LoaderArgs) {
       if (decryptedIssue.status === DecryptionStatus.MySecret) {
         return {
           ...issue,
+          isEncrypted: true,
           status: decryptedIssue.status,
           title: decryptedIssue.title,
           body: decryptedIssue.body,
@@ -96,7 +95,7 @@ export default function IssuesIndex() {
   const { displayName, issues } = useLoaderData();
   const submit = useSubmit();
   const [searchParams, setSearchParams] = useSearchParams();
-
+  console.log(issues);
   useHotkeys("h", () => {
     submit(null, {
       method: "get",

@@ -5,6 +5,8 @@ import { classNames, isInViewport } from "~/utils";
 import KeyIcon from "~/components/KeyIcon";
 import { ListCommands } from "~/components/ListCommands";
 import sanitizeHtml from "sanitize-html";
+import IssueLockIcon from "~/components/IssueLockIcon";
+import { DecryptionStatus } from "~/types";
 
 interface ListState {
   selectedItem: number;
@@ -16,7 +18,9 @@ interface ListProps {
     id: string;
     number: number;
     titleHTML: string;
+    title?: string;
     bodyHTML: string;
+    isEncrypted?: boolean;
     assignees: {
       nodes: Array<{
         login: string;
@@ -156,6 +160,13 @@ export default function PullRequestOrIssuesList({
             <Link to={`/${owner}/${name}/${itemSlug}/${item.number}`}>
               <div className="flex items-center truncate">
                 <span className="pl-2 pr-4 text-slate-400">#{item.number}</span>
+                {item.isEncrypted && (
+                  <IssueLockIcon
+                    className="pr-2"
+                    status={DecryptionStatus.MySecret}
+                  />
+                )}
+                {item.title && <div>{item.title}</div>}
                 <div
                   dangerouslySetInnerHTML={{
                     __html: sanitizeHtml(item.titleHTML),

@@ -12,15 +12,13 @@ const KEY_SIZE = 24;
 async function encrypt(plaintext: string, key: Buffer, iv: Buffer) {
   const buffer = Buffer.from(plaintext);
   const cipher = crypto.createCipheriv(algorithm, key, iv);
-  cipher.update(buffer);
-  return cipher.final("base64");
+  return cipher.update(buffer, undefined, "base64") + cipher.final("base64");
 }
 
 async function decrypt(ciphertext: string, iv: Buffer, key: Buffer) {
   const buffer = Buffer.from(ciphertext, "base64");
   const decipher = crypto.createDecipheriv(algorithm, key, iv);
-  decipher.update(buffer);
-  return decipher.final("utf8");
+  return decipher.update(buffer) + decipher.final("utf8");
 }
 
 export async function decryptIssue({

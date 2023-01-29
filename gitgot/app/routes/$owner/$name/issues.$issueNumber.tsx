@@ -214,8 +214,8 @@ export default function IssuePage() {
         <h2 className="text-lg">
           <Link to={`/${issue.author.login}`}>{issue.author.login}</Link>
         </h2>
-        <div>{issue.body}</div>
-        <ul className="flex flex-col space-y-5 whitespace-normal p-5 font-normal">
+        <div className="box mt-5 w-96 p-10">{issue.body}</div>
+        <ul className="mt-10 flex flex-col space-y-5 whitespace-normal p-5 font-normal">
           {issue.timelineItems.nodes.filter(isDisplayedEvent).map((item) => (
             <TimelineItem key={item.id} type={item.__typename} payload={item} />
           ))}
