@@ -61,80 +61,6 @@ export default function PullRequestOrIssuesList({
     [nextSelectedRef, previousSelectedRef, selectedItem]
   );
 
-  useHotkeys(
-    "Enter",
-    () => {
-      const id = items[selectedItem].number;
-      submit(null, {
-        method: "get",
-        action: `/${owner}/${name}/${itemSlug}/${id}`,
-      });
-    },
-    [items, selectedItem]
-  );
-
-  useHotkeys(
-    "space",
-    (event) => {
-      event.preventDefault();
-      if (selectedItem === peekedItem) {
-        setItemState((itemState) => ({
-          ...itemState,
-          peekedItem: undefined,
-        }));
-      } else {
-        setItemState((itemState) => ({
-          ...itemState,
-          peekedItem: itemState.selectedItem,
-        }));
-      }
-    },
-    [selectedItem, peekedItem]
-  );
-
-  useHotkeys(
-    "j",
-    () => {
-      setItemState(({ peekedItem, selectedItem }) => ({
-        selectedItem: (selectedItem + 1) % items.length,
-        peekedItem,
-      }));
-
-      if (nextSelectedRef.current) {
-        nextSelectedRef.current.focus();
-
-        if (!isInViewport(nextSelectedRef.current)) {
-          nextSelectedRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      }
-    },
-    [items, selectedItem]
-  );
-
-  useHotkeys(
-    "k",
-    () => {
-      setItemState(({ peekedItem, selectedItem }) => ({
-        selectedItem: (selectedItem + items.length - 1) % items.length,
-        peekedItem,
-      }));
-
-      if (previousSelectedRef.current) {
-        previousSelectedRef.current.focus();
-        if (!isInViewport(previousSelectedRef.current)) {
-          previousSelectedRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      }
-    },
-    [items, selectedItem]
-  );
-
   if (items.length === 0) {
     return (
       <div className="flex items-center py-10">
@@ -146,15 +72,11 @@ export default function PullRequestOrIssuesList({
   }
   return (
     <div className="flex flex-col items-center py-10">
-      <ListCommands />
       <ul className="flex w-full flex-col items-center space-y-4">
         {items.map((item, i) => (
           <li
             key={item.id}
-            className={classNames(
-              "w-full max-w-3xl border-2 border-slate-800 p-2 shadow-block",
-              i === selectedItem && "border-blue-400"
-            )}
+            className="w-full max-w-3xl border-2 border-slate-800 bg-white p-2 shadow-block hover:border-blue-500"
             ref={getRef(i)}
           >
             <Link to={`/${owner}/${name}/${itemSlug}/${item.number}`}>

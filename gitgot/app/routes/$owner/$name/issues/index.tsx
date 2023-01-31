@@ -1,20 +1,14 @@
-import {
-  useLoaderData,
-  useParams,
-  useSearchParams,
-  useSubmit,
-} from "@remix-run/react";
-import { useHotkeys } from "react-hotkeys-hook";
+import { useLoaderData, useParams } from "@remix-run/react";
 import PullRequestOrIssuesList from "~/components/PullRequestOrIssuesList";
 import KeyIcon from "~/components/KeyIcon";
 import { ActionArgs } from "@remix-run/server-runtime";
 import { LoaderArgs, redirect } from "@remix-run/node";
-import { GoToIssueForm } from "~/components/GoToIssueForm";
 import { authenticator } from "~/auth.server";
 import client from "~/apollo-client";
 import { gql } from "@apollo/client";
 import { decryptIssue } from "~/models/issue.server";
 import { DecryptionStatus } from "~/types";
+import { Link } from "react-router-dom";
 
 export async function action({ request, params }: ActionArgs) {
   const formData = await request.formData();
@@ -91,56 +85,16 @@ export async function loader({ request, params }: LoaderArgs) {
 }
 
 export default function IssuesIndex() {
+  const { issues } = useLoaderData();
   const { owner, name } = useParams();
-  const { displayName, issues } = useLoaderData();
-  const submit = useSubmit();
-  const [searchParams, setSearchParams] = useSearchParams();
-  console.log(issues);
-  useHotkeys("h", () => {
-    submit(null, {
-      method: "get",
-      action: `/${owner}/${name}`,
-    });
-  });
-
-  useHotkeys("n", () => {
-    submit(null, {
-      method: "get",
-      action: `/${owner}/${name}/issues/new`,
-    });
-  });
-
-  useHotkeys("g", () => {
-    setSearchParams({ state: "goto" });
-  });
-
-  useHotkeys("m", () => {
-    submit(null, {
-      method: "get",
-      action: `/${owner}/${name}/issues/assigned/${displayName}`,
-    });
-  });
-
-  if (searchParams.get("state") === "goto") {
-    return <GoToIssueForm />;
-  }
 
   return (
     <div className="w-2/3 max-w-4xl">
-      <h1 className="py-5 text-3xl font-bold">Issues</h1>
-      <div className="space-x-5 py-2">
-        <span>
-          <KeyIcon>h</KeyIcon> Go back to repository
-        </span>
-        <span>
-          <KeyIcon>n</KeyIcon> New issue
-        </span>
-        <span>
-          <KeyIcon>g</KeyIcon> Go to issue
-        </span>
-        <span>
-          <KeyIcon>m</KeyIcon> Go to assigned issues
-        </span>
+      <div className="flex items-center justify-between pt-5">
+        <h1 className="text-xl font-bold">Issues</h1>
+        <Link className="pr-5 text-2xl" to="new">
+          +
+        </Link>
       </div>
       <PullRequestOrIssuesList
         items={issues}
